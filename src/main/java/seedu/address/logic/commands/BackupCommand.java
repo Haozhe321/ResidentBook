@@ -2,13 +2,8 @@ package seedu.address.logic.commands;
 
 import seedu.address.MainApp;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.person.exceptions.DuplicatePersonException;
-import seedu.address.storage.Storage;
-import seedu.address.storage.StorageManager;
 
 import java.io.IOException;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Create backup copy of address book.
@@ -26,7 +21,7 @@ public class BackupCommand extends UndoableCommand {
     @Override
     public CommandResult executeUndoableCommand() throws CommandException {
         try {
-            MainApp.backup.backupAddressBook(model.getAddressBook());
+            MainApp.getBackup().backupAddressBook(model.getAddressBook());
             return new CommandResult(String.format(MESSAGE_SUCCESS));
         } catch (IOException e) {
             return new CommandResult(String.format(MESSAGE_ERROR) + e.getMessage());
