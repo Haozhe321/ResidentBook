@@ -29,9 +29,10 @@ This app will not work with earlier versions of Java 8.
 image::Ui.png[width="790"]
 +
 .  Type the command in the command box and press kbd:[Enter] to execute it. +
-e.g. typing *`help`* and pressing kbd:[Enter] will open the help window.+
-image::Ui_help.png[width="790"]+
-
+e.g. typing *`help`* and pressing kbd:[Enter] will open the help window.
++
+image::Ui_help.png[width="790"]
++
 .  Some example commands you can try:
 
 * *`list`* : lists all contacts
@@ -40,12 +41,13 @@ image::Ui_help.png[width="790"]+
 * *`exit`* : exits the app
 .  The following is an example of a successful execution of commands. 
 +
-image::Ui_success.png[width="790"]+
+image::Ui_success.png[width="790"]
++
 
 .  The following is an example of a unsuccessful execution of commands. 
 +
-image::Ui_short_error.png[width="790"]+
-
+image::Ui_short_error.png[width="790"]
++
 .  Refer to the link:#features[Features] section below for details of each command.
 
 == Features
