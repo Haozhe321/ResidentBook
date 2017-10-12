@@ -39,12 +39,12 @@ image::Ui_help.png[width="790"]
 * **`add`**`n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : adds a contact named `John Doe` to the Address Book.
 * **`delete`**`3` : deletes the 3rd contact shown in the current list
 * *`exit`* : exits the app
-.  The following is an example of a successful execution of commands. 
+.  The following is an example of a successful execution of commands.
 +
 image::Ui_success.png[width="790"]
 +
 
-.  The following is an example of a unsuccessful execution of commands. 
+.  The following is an example of a unsuccessful execution of commands.
 +
 image::Ui_short_error.png[width="790"]
 +
