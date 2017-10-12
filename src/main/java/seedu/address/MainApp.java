@@ -41,6 +41,7 @@ import seedu.address.ui.UiManager;
 public class MainApp extends Application {
 
     public static final Version VERSION = new Version(0, 6, 0, true);
+    public static Storage backup;
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
 
@@ -63,6 +64,7 @@ public class MainApp extends Application {
         userPrefs = initPrefs(userPrefsStorage);
         AddressBookStorage addressBookStorage = new XmlAddressBookStorage(userPrefs.getAddressBookFilePath());
         storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        backup = storage;
 
         initLogging(config);
 
@@ -204,6 +206,15 @@ public class MainApp extends Application {
     public void handleExitAppRequestEvent(ExitAppRequestEvent event) {
         logger.info(LogsCenter.getEventHandlingLogMessage(event));
         this.stop();
+    }
+
+    public void backup() {
+        logger.info("Creating backup for Address book");
+        try {
+            storage.backupAddressBook(model.getAddressBook());
+        } catch (IOException e) {
+            logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
+        }
     }
 
     public static void main(String[] args) {
