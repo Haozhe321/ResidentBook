@@ -1,9 +1,10 @@
 package seedu.address.logic.commands;
 
+import java.io.IOException;
+
 import seedu.address.MainApp;
 import seedu.address.logic.commands.exceptions.CommandException;
 
-import java.io.IOException;
 
 /**
  * Create backup copy of address book.
