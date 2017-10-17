@@ -804,15 +804,24 @@ Use case ends
 Use case ends.
 
 *Extensions*
+
 * 1a. System detects there is no new file to backup
+
 ** 1a1. System outputs message saying there is nothing new to backup
   Use case ends.
+
 * 3a. System detects an invalid backup location
+
 ** 3a1. System asks for a new backup location
+
 ** Steps 3 is repeated until a valid backup location is entered
+
   Use cases resumes at step 4
+
 * 3b. System detects not enough storage on hard drive
+
 ** 3b1. System tells user not enough space on hard drive
+
   Use case ends.
 
 
