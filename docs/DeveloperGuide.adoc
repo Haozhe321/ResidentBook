@@ -792,6 +792,7 @@ Use case resumes at step 2
 Use case ends
 
 
+[discrete]
 == Use case: Backup storage files
 
 *MSS*
@@ -803,20 +804,20 @@ Use case ends
 Use case ends.
 
 *Extensions*
-1a. System detects there is no new file to backup
-  1a1. System outputs message saying there is nothing new to backup
+* 1a. System detects there is no new file to backup
+** 1a1. System outputs message saying there is nothing new to backup
   Use case ends.
-3a. System detects an invalid backup location
-  3a1. System asks for a new backup location
-  Steps 3 is repeated until a valid backup location is entered
+* 3a. System detects an invalid backup location
+** 3a1. System asks for a new backup location
+** Steps 3 is repeated until a valid backup location is entered
   Use cases resumes at step 4
-3b. System detects not enough storage on hard drive
-  3b1. System tells user not enough space on hard drive
+* 3b. System detects not enough storage on hard drive
+** 3b1. System tells user not enough space on hard drive
   Use case ends.
 
 
-
-==Use case: View and delete obsolete contacts
+[discrete]
+== Use case: View and delete obsolete contacts
 
 *MSS*
 1. User requests to view unused contacts beyond a certain time (i.e. contacts not viewed for 3 years or more)
