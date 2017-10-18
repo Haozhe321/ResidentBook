@@ -76,6 +76,9 @@ public class AddressBookParser {
         case BackupCommand.COMMAND_ALIAS:
             return new BackupCommand();
 
+        case ImportCommand.COMMAND_WORD:
+        case ImportCommand.COMMAND_ALIAS:
+            return new ImportCommandParser().parse(arguments);
 
         case FindCommand.COMMAND_WORD:
         case FindCommand.COMMAND_ALIAS:
