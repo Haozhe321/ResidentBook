@@ -1,6 +1,5 @@
 package seedu.address.logic.parser;
 
-import com.sun.xml.internal.ws.wsdl.writer.document.Import;
 import seedu.address.logic.commands.ImportCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
