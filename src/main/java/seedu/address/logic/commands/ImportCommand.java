@@ -1,20 +1,17 @@
 package seedu.address.logic.commands;
 
-import javafx.collections.ObservableList;
-import seedu.address.MainApp;
-import seedu.address.commons.exceptions.DataConversionException;
-import seedu.address.logic.commands.AddCommand;
-import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.UndoableCommand;
-import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.ReadOnlyAddressBook;
-import seedu.address.model.person.ReadOnlyPerson;
-import seedu.address.model.person.exceptions.DuplicatePersonException;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
+import javafx.collections.ObservableList;
+import seedu.address.MainApp;
+import seedu.address.commons.exceptions.DataConversionException;
+import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.person.ReadOnlyPerson;
+import seedu.address.model.person.exceptions.DuplicatePersonException;
 
 /**
  * Import contacts from xml file.
@@ -53,10 +50,10 @@ public class ImportCommand extends UndoableCommand {
             return new CommandResult(String.format(MESSAGE_SUCCESS));
         } catch (DataConversionException e) {
             throw new CommandException(MESSAGE_ERROR);
-        } catch (IOException e) {
-            throw new CommandException(MESSAGE_ERROR);
         } catch (DuplicatePersonException e) {
             throw new CommandException(AddCommand.MESSAGE_DUPLICATE_PERSON);
+        }catch (IOException e) {
+            throw new CommandException(MESSAGE_ERROR);
         }
     }
 }
