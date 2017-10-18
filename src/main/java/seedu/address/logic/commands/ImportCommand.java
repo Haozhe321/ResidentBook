@@ -52,7 +52,7 @@ public class ImportCommand extends UndoableCommand {
             throw new CommandException(MESSAGE_ERROR);
         } catch (DuplicatePersonException e) {
             throw new CommandException(AddCommand.MESSAGE_DUPLICATE_PERSON);
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new CommandException(MESSAGE_ERROR);
         }
     }
