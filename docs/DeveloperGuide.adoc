@@ -367,7 +367,8 @@ Certain properties of the application can be controlled (e.g App name, logging l
 // tag::import[]
 === Import mechanism
 
-The import mechanism is essentially adding multiple contacts to the address book automatically by referencing a xml file. It is implemented by calling add function repeatedly till all the new contacts have been added to the current contact list. +
+The import mechanism is essentially adding multiple contacts to the address book automatically by referencing a xml file. It is implemented by calling add function repeatedly till all the new contacts have been added to the current contact list.
+
 One consideration of this mechanism is that contacts with identical names will not be added as the current address book is regarded as the most updated version and the import feature aims to only facilitate addition of new contacts.
 
 The Import Command is implemented this way, where user will specify the filePath:
