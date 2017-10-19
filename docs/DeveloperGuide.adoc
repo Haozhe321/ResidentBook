@@ -386,6 +386,8 @@ The following activity diagram summarize what happens inside the `ImportCommand`
 
 image::ImportCommandActivityDiagram.png[width="300"]
 
+Future enhancements may include a selection option from the UI and allowing the users to specify if they would like to overwrite contacts with identical names.
+
 == Documentation
 
 We use asciidoc for writing documentation.
