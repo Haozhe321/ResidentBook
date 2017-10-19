@@ -382,7 +382,7 @@ If the filePath is invalid, then there are no file that is readable and hence, a
 
 The following activity diagram summarize what happens inside the `ImportCommand` when a user executes this command:
 
-image::ImportCommandActivityDiagram.png[width="200"]
+image::ImportCommandActivityDiagram.png[width="300"]
 
 == Documentation
 
