@@ -371,6 +371,13 @@ The add picture mechanism allows the adding of a picture to every individual per
 
 Images are saved in he format `<name><contact>` to differentiate between persons with the same name
 
+// tag::autocomplete
+=== Autocomplete Feature
+
+The autocomplete mechanism implements a list of commands to be auto-completed upon user input
+
+The autocomplete list is obtained from the creation of an AutoComplete object and is automatically updated since it utilizes the model within the LogicManager
+
 // tag::undoredo[]
 === Temporary Contact mechanism
 
