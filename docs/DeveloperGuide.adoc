@@ -598,7 +598,7 @@ The String array of currently displayed phrases is updated upon every update ins
         ...
 ----
 
-The `smart` feature of the autocomplete feature in that it will display person names or indexes when certain commands are typed is implemented by concatenating resident names or indexes to the end of the search phrase. 
+The `smart` feature of the autocomplete feature in that it will display person names or indexes when certain commands are typed is implemented by concatenating resident names or indexes to the end of the search phrase.
 
 [source,java]
 ----
@@ -619,13 +619,6 @@ The `smart` feature of the autocomplete feature in that it will display person n
                 newAutoCompleteList[i] = command + " " + personsStringArray.get(i);
             ...
 ----
-
-==== Design Considerations
-
-**Alternatives Considered:**
-
-**Pros:** Much easier to implement and 
-**Cons:** This would also mean that it would be impossible for the application to be portable since the images could not be possibly be bundled together when the user wants to migrate the application to another platform.
 
 // end::autocomplete[]
 
