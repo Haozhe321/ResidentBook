@@ -820,6 +820,12 @@ public CommandResult executeUndoableCommand() throws CommandException {
 }
 ----
 
+Furthermore, if the date is not a valid date (for eg. 29/02/2017) or the event spans for more than one day, the user will receive appropriate error messages:
+
+image::invalid_date.png[width:800]
+
+image::invalid_duration.png[width:800]
+
 
 Possible Future Implementations:
 
@@ -1187,7 +1193,7 @@ the username and password.
 // tag::styling[]
 === UI Styling
 
-image::Ui_Breakdown.png[width:800]
+image::Ui_breakdown.png[width:800]
 
 The main styling for the `UI` can be found in `DarkTheme.css`. The document has been divided into the following sections:
 
