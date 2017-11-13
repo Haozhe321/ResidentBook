@@ -210,7 +210,6 @@ A list of commands executed.
 * Command: `backup`
 * Sample Command: +
 *backup*
-* Do add another picture for a Resident as specified earlier. This is to showcase the backing up of images.
 * Expected Result: +
 A copy of the current ResidentBook is saved in the folder “./data/backup.xml”. Also, “data/contact_images_backup/” is created with the images saved from earlier
 
