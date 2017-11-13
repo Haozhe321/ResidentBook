@@ -100,5 +100,4 @@ include::../DeveloperGuide.adoc[tag=highlight]
 === Other contributions
 
 * User Stories and Use Cases
-* Updated issues within according to user stories
 * Aided other teams in acceptance testing (Issue: https://github.com/CS2103AUG2017-T14-B3/main/issues/98)
