@@ -534,7 +534,7 @@ image::removeTagCommand_error.png[width='800']
 
 Person Panel has been introduced to allow additional information of residents to be displayed.
 
-image::personPanel.png[width="500"]
+image::personPanel.png[width="300"]
 
 * Panel includes GUI add and delete image buttons to update pictures of residents
 

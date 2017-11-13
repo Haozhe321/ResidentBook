@@ -24,7 +24,7 @@ A simple, clean and minimalist design is adopted for the GUI. One glance through
 
 *Code contributed*: [https://github.com/CS2103AUG2017-F09-B1/main/blob/master/collated/main/shitian007.md[Functional code]] [https://github.com/CS2103AUG2017-F09-B1/main/blob/master/collated/test/shitian007.md[Test code]]
 
-=== Enhancement Added: Add Picture
+=== Enhancement Added: Add/Delete Picture
 
 ==== External behavior
 
