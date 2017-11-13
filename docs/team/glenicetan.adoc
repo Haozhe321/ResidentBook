@@ -42,21 +42,23 @@ For administrators, the worst nightmare that can happen is when the data is corr
 
 Hence, the Backup command helps to save an additional copy of the current ResidentBook data. It works hand in hand together with the import command. When required, staff can clear the corrupted data from the ResidentBook application and import the backup.xml.
 
+==== Use Case
+
+---
+#Start of Extract [from: Developer Guide]#
+
+include::../DeveloperGuide.adoc[tag=backupUseCase]
+
+#End of Extract#
+
+---
+
 ==== Implementation
 
 ---
 #Start of Extract [from: Developer Guide]#
 
 include::../DeveloperGuide.adoc[tag=backup]
-
-#End of Extract#
-
----
-
-==== Use Case
-#Start of Extract [from: Developer Guide]#
-
-include::../DeveloperGuide.adoc[tag=backupUseCase]
 
 #End of Extract#
 
