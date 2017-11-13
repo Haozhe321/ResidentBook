@@ -1,0 +1,253 @@
+= Test Script
+:toc:
+:toc-title:
+:toc-placement: preamble
+:sectnums:
+:imagesDir: images
+:stylesDir: stylesheets
+:stylesheet: boot-readable.css
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+endif::[]
+ifdef::env-github,env-browser[:outfilesuffix: .adoc]
+:repoURL: https://github.com/CS2103AUG2017-F09-B1/main
+
+By: `Team F09-B1`      Since: `AUG 2017`      Licence: `MIT`
+
+== Instructions
+
+1. Download the SampleData.zip and .jar file.
+2. Unzip the folder SampleData.zip.
+3. There are 4 files inside: _residentbook.xml_ , _eventbook.xml_ , _exchangeStudent.xml_ and _SampleImage.jpg_ .
+4. Put the .jar file into an empty folder.
+5. Create an empty folder inside this folder and name it "data".
+6. Go into the "data" folder.
+7. Copy all 4 files and paste inside "data" folder.
+8. Create an empty folder in the "data" folder and name it "contact_images".
+9. Double click the .jar file, the residents and events are now loaded into the ResidentBook.
+
+== Manual Testing
+
+[NOTE]
+This guide is supposed to be followed *strictly* in steps. All
+commands start with a lowercase, and are case-sensitive. For example,
+running `Help` will not be the same as running `help`.
+
+If you do not wish to follow the commands in the order provided, the
+functions can be tested in isolation. However, please note that the
+state of the application may be different and hence +
+1. the expected results might be different too +
+2. there might be errors i.e. trying to edit a person not added before.
+
+=== Help
+
+* Command: `help`
+* Expected Result: +
+A help window with a detailed guide will be shown.
+
+== Change Residents details
+
+=== Add Person
+
+* Command: `add`
+* Sample Command: +
+*add n/Tianmimi p/98765435 e/tianmimi@example.com r/01-100*
+
+* Expected Result: +
+New person will be shown in the person list panel at the 20th index
+
+=== Edit Person
+
+* Command: `edit`
+* Sample Command: +
+*edit 1 p/91234567 e/johndoe@example.com*
+
+* Expected Result: +
+Abeforth's phone will be changed to 91234567, and email changed to johndoe@example.com
+
+=== Delete Person
+
+* Command: `delete`
+* Sample Command: +
+*delete 1*
+* Expected Result: +
+Abeforth will be deleted from the list of residents. Alex Yeoh is now the first in the list. There should have 20 residents left.
+
+=== Delete Person(s) by Tag
+
+* Command: `deletebytag`
+* Sample Command: +
+*deletebytag NUSSU*
+* Expected Result: +
+Only 2 residents will be deleted since only two residents has the "NUSSU" tag. There should have 18 residents left.
+
+=== Add Temporary Resident
+
+* Same command as add, but with a temp/ parameter. The number after
+temp/ is the number of days this temporary resident will stay in the
+ResidentBook before being deleted by the ResidentBook.
+* Sample Command: +
+*add n/James Bond e/Jamesbond@example.com r/09-100 p/98765432 temp/1 t/hero*
+
+* Expected Result: +
+AddressBook will give a warning "Warning: This contact will expire after your preset time" and one temporary resident (James Bond) will be added which will expire after one day. Now there are 19 residents.
+
+=== Swap Room
+
+* Command: `swaproom`
+* Sample Command: +
+*swaproom 8 9*
+* Expected Result: +
+Room for James Bond and James Hobbit will be swapped. New room for James Bond is now 04-120, new room for James Hobbit is now 09-100.
+
+=== Remove Tags from all Residents
+
+* Command: `removeTag`
+* Sample Command: +
+*removeTag RA*
+* Expected Result: +
+No tags with "RA" will be present in the ResidentBook. Apart from the removal of tags, no other details are edited.
+
+=== Add Image
+
+* Command: `addImage`
+* Note: A sample image is provided in the SampleData folder.
+* Sample Command: +
+*addImage 1 url/SAMPLE_IMAGE_ABSOLUTE_FILE_PATH*
+* Expected Result: +
+The first resident, Alex Yeoh, will now have his profile picture added. Use the command `select 1` to see the profile picture.
+
+=== Delete Image
+
+* Command: `deleteImage`
+* Sample Command: +
+*deleteImage 1*
+* Expected Output: +
+The first resident, Alex Yeoh, will now have his profile picture removed.
+
+== Command that edit Events
+
+=== Add Event
+
+* Command: `addevent`
+* Sample Command: +
+*addevent ti/End of Sem Lunch des/Organised by USC loc/Cinnamon College time/29/11/2017 2030 to 2245*
+* Expected Result: +
+"End of Sem Lunch" will be shown on the calendar on the 29th November. New event will also be shown in the event list at the 4th position.
+
+=== Delete Events
+
+* Command: `deleteEvent`
+* Sample Command: +
+*deleteEvent 1*
+* Expected Result: +
+"Chess Training" will be deleted from both the calendar and event list
+
+== Change the display of ResidentBook
+
+=== Find Residents by Keyword
+* Command: `find`
+* Sample Command: +
+*find holmes*
+* Expected Result: +
+Click on the Resident tab. Only Sherlock Holmes will now be displayed.
+
+=== Previous or Next month in Calendar
+
+* Command: `prev` and `next`
+* Toggles between previous and next month on the calendar panel
+* Sample Command (Assuming current date is in November): +
+*prev*
+* Expected Results: +
+Calendar will now show the dates and events for October
+* Sample Command (Calendar is now in October): +
+*next*
+* Expected Result: +
+Calendar will now show the dates and events for November
+
+=== Highlight Residents by Tag
+
+* Command: `highlight`
+* Sample Command: +
+*highlight staff*
+* Expected Result: +
+Residents with tag staff is highlighted in green. There should be 4 entries selected.
+* To remove the highlights: +
+*highlight -*
+* Expected Result: +
+All highlights are removed.
+
+=== Select Person
+
+* Command: `select`
+* Sample Command: +
+*select 1*
+* Expected Result: +
+*The middle pane will display details of selected Resident.*
+
+=== List all Person
+
+* Command: `list`
+* Sample Command: +
+*list*
+* Expected Result: +
+All residents are listed. Scroll to check, there are 20 entries.
+
+== General commands
+
+=== View a history of past commands
+
+* Command: `history`
+* Sample Command: +
+*history*
+* Expected output: +
+A list of commands executed.
+
+=== Backup
+
+* Command: `backup`
+* Sample Command: +
+*backup*
+* Expected Result: +
+A copy of the current ResidentBook is saved in the folder “./data/backup.xml”. Also, “data/contact_images_backup/” is created with the images saved from earlier
+
+=== Clear
+
+* Command: `clear`
+* Sample Command:+
+*clear*
+* Expected Result:
+* All data from ResidentBook and EventBook will be deleted
+
+=== Import
+
+* Command: `import`
+* Do note to enter full directory path.
+* Sample Command: +
+*import DIR_TO_TEST_FOLDER/data/exchangeStudents.xml*
+* Expected Result: +
+3 entries (Amy Parker, Clarke Ben, Tony Stark) will be found in the ResidentBook. EventBook remains empty.
+
+=== Undo last undoable command
+
+* Command: `undo`
+* Sample Command: +
+*undo*
+* Expected Result: +
+The previous 3 entries will not exist in the ResidentBook.
+
+=== Redo last undoable command
+* Command: `redo`
+* Sample Command: +
+*redo*
+* Expected Result: +
+3 entries (Amy Parker, Clarke Ben, Tony Stark) will be found in the ResidentBook. EventBook remains empty.
+
+=== Exit
+* Command: `Exit`
+* Sample Command: +
+*exit*
+* Expected Result: +
+The ResidentBook application is closed.
