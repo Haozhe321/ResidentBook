@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<eventbook>
+    <events>
+        <title>Chess Training</title>
+        <description>Drama performance</description>
+        <location>Level 4 Lounge</location>
+        <datetime>11/10/2017 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>Deans Address</title>
+        <description>College Wide Event</description>
+        <location>UTSH</location>
+        <datetime>19/12/2017 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>Diwali Celebrations</title>
+        <description>Festival</description>
+        <location>Cinnamon College</location>
+        <datetime>01/12/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>End of Semester Dinner</title>
+        <description>Organised by USC</description>
+        <location>Cinnamon College</location>
+        <datetime>01/11/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>End of Semester Dinner</title>
+        <description>Organised by USC</description>
+        <location>Cinnamon College</location>
+        <datetime>15/11/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>End of Semester Dinner</title>
+        <description>Organised by USC</description>
+        <location>Cinnamon College</location>
+        <datetime>28/10/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>Frisbee Finals</title>
+        <description>Talk by Students</description>
+        <location>MPSH</location>
+        <datetime>08/11/2017 0800 to 0900</datetime>
+    </events>
+    <events>
+        <title>Gala Dinner</title>
+        <description>Freshmen Event</description>
+        <location>CHIJMES</location>
+        <datetime>25/09/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>Meet Minister</title>
+        <description>Talk by Students</description>
+        <location>Chua Thian Poh Hall</location>
+        <datetime>17/11/2017 0800 to 0900</datetime>
+    </events>
+    <events>
+        <title>Movie Screening</title>
+        <description>Free Admission</description>
+        <location>Chatterbox</location>
+        <datetime>03/12/2017 0800 to 1100</datetime>
+    </events>
+    <events>
+        <title>Neighbourhood Party</title>
+        <description>Organised by USC</description>
+        <location>YaleNUS</location>
+        <datetime>07/11/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>New Year Celebrations</title>
+        <description>Festival</description>
+        <location>Blackbox</location>
+        <datetime>01/01/2018 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>Orientation Day 1</title>
+        <description>Organised by House Comm</description>
+        <location>Cinnamon College</location>
+        <datetime>12/12/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>Orientation Day 2</title>
+        <description>Talk by Students</description>
+        <location>Cinnamon College</location>
+        <datetime>13/12/2017 2030 to 2230</datetime>
+    </events>
+    <events>
+        <title>Piano Concert</title>
+        <description>By USClassical</description>
+        <location>Chatterbox</location>
+        <datetime>05/09/2017 0800 to 0900</datetime>
+    </events>
+    <events>
+        <title>Start of Sem Dinner</title>
+        <description>Organised by USC</description>
+        <location>Cinnamon College</location>
+        <datetime>27/01/2017 2030 to 2359</datetime>
+    </events>
+    <events>
+        <title>USAmbassadors Meeting</title>
+        <description>Drama performance</description>
+        <location>Dining Hall</location>
+        <datetime>17/10/2017 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>USPolymath Talk</title>
+        <description>Talk by Students</description>
+        <location>Chatterbox</location>
+        <datetime>02/11/2017 0800 to 0900</datetime>
+    </events>
+    <events>
+        <title>USPolymath Talk</title>
+        <description>Talk by Students</description>
+        <location>Chatterbox</location>
+        <datetime>04/10/2017 0800 to 0900</datetime>
+    </events>
+    <events>
+        <title>USProductions</title>
+        <description>Drama performance</description>
+        <location>Blackbox</location>
+        <datetime>03/10/2017 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>USProductions</title>
+        <description>Drama performance</description>
+        <location>Blackbox</location>
+        <datetime>17/09/2017 1200 to 1500</datetime>
+    </events>
+    <events>
+        <title>Volleyball Training</title>
+        <description>Sports</description>
+        <location>CTPH</location>
+        <datetime>29/11/2017 1200 to 1500</datetime>
+    </events>
+</eventbook>

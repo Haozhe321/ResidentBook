@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<residentbook>
+    <persons>
+        <name>Abeforth</name>
+        <phone>92491321</phone>
+        <email>abeforth@example.com</email>
+        <room>15-132</room>
+        <timestamp>null</timestamp>
+        <tagged>year2</tagged>
+    </persons>
+    <persons>
+        <name>Alex Yeoh</name>
+        <phone>87438807</phone>
+        <email>alexyeoh@example.com</email>
+        <room>09-119</room>
+        <timestamp>null</timestamp>
+        <tagged>professor</tagged>
+    </persons>
+    <persons>
+        <name>Bernice Yu</name>
+        <phone>99272758</phone>
+        <email>berniceyu@example.com</email>
+        <room>10-100A</room>
+        <timestamp>null</timestamp>
+        <tagged>year1</tagged>
+        <tagged>RA</tagged>
+    </persons>
+    <persons>
+        <name>Charlotte Oliveiro</name>
+        <phone>93210283</phone>
+        <email>charlotte@example.com</email>
+        <room>21-118</room>
+        <timestamp>null</timestamp>
+        <tagged>year2</tagged>
+    </persons>
+    <persons>
+        <name>David Li</name>
+        <phone>91023282</phone>
+        <email>lidavid@example.com</email>
+        <room>26-105</room>
+        <timestamp>null</timestamp>
+        <tagged>year2</tagged>
+    </persons>
+    <persons>
+        <name>Dolores Umbridge</name>
+        <phone>91928282</phone>
+        <email>dolores@example.com</email>
+        <room>16-115</room>
+        <timestamp>null</timestamp>
+        <tagged>year1</tagged>
+    </persons>
+    <persons>
+        <name>Govind Koyal</name>
+        <phone>92412321</phone>
+        <email>govind@example.com</email>
+        <room>16-134F</room>
+        <timestamp>null</timestamp>
+        <tagged>year1</tagged>
+        <tagged>NUSSU</tagged>
+    </persons>
+    <persons>
+        <name>Harry Jones</name>
+        <phone>93211233</phone>
+        <email>harry@example.com</email>
+        <room>07-118</room>
+        <timestamp>null</timestamp>
+        <tagged>helper</tagged>
+        <tagged>staff</tagged>
+        <tagged>year2</tagged>
+    </persons>
+    <persons>
+        <name>Irfan Ibrahim</name>
+        <phone>92492321</phone>
+        <email>irfan@example.com</email>
+        <room>17-135F</room>
+        <timestamp>null</timestamp>
+        <tagged>year1</tagged>
+    </persons>
+    <persons>
+        <name>James Hobbit</name>
+        <phone>92620917</phone>
+        <email>jamesh@example.com</email>
+        <room>04-120</room>
+        <timestamp>null</timestamp>
+        <tagged>cleaner</tagged>
+        <tagged>staff</tagged>
+    </persons>
+    <persons>
+        <name>James T Kirk</name>
+        <phone>98765654</phone>
+        <email>kirk@example.com</email>
+        <room>04-135F</room>
+        <timestamp>null</timestamp>
+        <tagged>year4</tagged>
+    </persons>
+    <persons>
+        <name>Jeremy Arnold</name>
+        <phone>87432307</phone>
+        <email>jeremy@example.com</email>
+        <room>10-152</room>
+        <timestamp>null</timestamp>
+        <tagged>professor</tagged>
+        <tagged>fulltime</tagged>
+    </persons>
+    <persons>
+        <name>Katniss Mallark</name>
+        <phone>92981282</phone>
+        <email>kat92@example.com</email>
+        <room>03-115</room>
+        <timestamp>null</timestamp>
+        <tagged>NUSSU</tagged>
+        <tagged>year3</tagged>
+    </persons>
+    <persons>
+        <name>Leia Krotes</name>
+        <phone>87488807</phone>
+        <email>leia@example.com</email>
+        <room>07-119B</room>
+        <timestamp>null</timestamp>
+        <tagged>management</tagged>
+    </persons>
+    <persons>
+        <name>Luna Lovegood</name>
+        <phone>92620977</phone>
+        <email>luna@example.com</email>
+        <room>21-130</room>
+        <timestamp>null</timestamp>
+        <tagged>staff</tagged>
+    </persons>
+    <persons>
+        <name>Peter Vail</name>
+        <phone>99098758</phone>
+        <email>peter@example.com</email>
+        <room>05-150A</room>
+        <timestamp>null</timestamp>
+        <tagged>Professor</tagged>
+        <tagged>RA</tagged>
+    </persons>
+    <persons>
+        <name>Roy Balakrishnan</name>
+        <phone>92624417</phone>
+        <email>royb@example.com</email>
+        <room>12-120E</room>
+        <timestamp>null</timestamp>
+        <tagged>staff</tagged>
+    </persons>
+    <persons>
+        <name>Shawna Metzger</name>
+        <phone>98383283</phone>
+        <email>shwana@example.com</email>
+        <room>20-119</room>
+        <timestamp>null</timestamp>
+        <tagged>year2</tagged>
+    </persons>
+    <persons>
+        <name>Sherlock Holmes</name>
+        <phone>90982758</phone>
+        <email>sherlock@example.com</email>
+        <room>16-100A</room>
+        <timestamp>null</timestamp>
+        <tagged>year1</tagged>
+        <tagged>RA</tagged>
+    </persons>
+    <persons>
+        <name>Varun Gupta</name>
+        <phone>91030982</phone>
+        <email>varun@example.com</email>
+        <room>30-115</room>
+        <timestamp>null</timestamp>
+        <tagged>year3</tagged>
+    </persons>
+    <tags>Professor</tags>
+    <tags>cleaner</tags>
+    <tags>staff</tags>
+    <tags>year1</tags>
+    <tags>year2</tags>
+    <tags>year3</tags>
+    <tags>RA</tags>
+    <tags>year4</tags>
+    <tags>professor</tags>
+    <tags>helper</tags>
+    <tags>management</tags>
+    <tags>fulltime</tags>
+    <tags>NUSSU</tags>
+</residentbook>

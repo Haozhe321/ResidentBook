@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<residentbook>
+    <persons>
+        <name>Amy Parker</name>
+        <phone>98712432</phone>
+        <email>amy_parker@spidey.com</email>
+        <room>09-112</room>
+        <timestamp>null</timestamp>
+        <tagged>exchangeStudent</tagged>
+        <tagged>year3</tagged>
+    </persons>
+    <persons>
+        <name>Clarke Ben</name>
+        <phone>98755432</phone>
+        <email>ben_c@zenny.com</email>
+        <room>08-115</room>
+        <timestamp>null</timestamp>
+        <tagged>exchangeStudent</tagged>
+        <tagged>year4</tagged>
+    </persons>
+    <persons>
+        <name>Tony Stark</name>
+        <phone>91995432</phone>
+        <email>iron_man@stark.com</email>
+        <room>21-115</room>
+        <timestamp>null</timestamp>
+        <tagged>Professor</tagged>
+        <tagged>RA</tagged>
+    </persons>
+    <tags>exchangeStudent</tags>
+    <tags>year3</tags>
+    <tags>year4</tags>
+    <tags>Professor</tags>
+    <tags>RA</tags>
+</residentbook>
