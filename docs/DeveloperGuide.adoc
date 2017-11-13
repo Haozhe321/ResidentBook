@@ -367,13 +367,57 @@ Certain properties of the application can be controlled (e.g App name, logging l
 // tag::picture[]
 === Add Picture
 
-The add picture mechanism allows the adding of a picture to every individual person. +
-Images are saved in he format `<name><contact>` to differentiate between persons with the same name +
-It is implemented as both a CLI as well as a GUI feature.
+The add/delete picture mechanism allows the adding of an image to every individual resident. +
+Images are saved in the format `[NAME][CONTACT].jpg` to differentiate between persons with the same name +
 
-The GUI version includes two buttons available to the user in the PersonPanel.
+The mechanism is as two different versions:
+* GUI Version
+* CLI Version
 
-This is implemented in the PersonPanel directly using the Button object.
+==== Picture
+
+A Picture class is implemented to record the image url of every resident.
+
+Considering the drastically different accessible file paths between development and production mode, every Picture includes a jar URL for production mode.
+Both of these URLs are updated when a new image is added.
+
+[source,java]
+----
+    public Picture() {
+        this.pictureUrl = PLACEHOLDER_IMAGE;
+        this.jarPictureUrl = PLACEHOLDER_JAR_URL;
+        this.jarResourcePath = false;
+    }
+----
+
+Every resident is given a default placeholder image URL on instantiation which points to the placeholder_person present in resources
+
+[source,java]
+----
+    public static final String PLACEHOLDER_IMAGE = System.getProperty("user.dir")
+            + "/src/main/resources/images/placeholder_person.png";
+
+    public static final String PLACEHOLDER_JAR_URL = "/images/placeholder_person.png";
+----
+
+==== Add/Delete Picture (GUI Version)
+
+The GUI version includes two buttons available to the user in the PersonPanel when a person is selected.
+
+Since it does not make sense for an image to be added when no Resident is selected, the GUI buttons are automatically disabled when no resident is selected, utilizing the enableButtons method as illustrated below
+
+[source,java]
+----
+    private void enableButtons(boolean state) {
+        this.addImageButton.setDisable(!state);
+        this.resetImageButton.setDisable(!state);
+    }
+----
+
+The add/delete image buttons is implemented in the PersonPanel with a handler for each button.
+
+[TIP]
+Since the file paths for `Production` and `Development` environments are different as mentioned, it is imperative that we verify for resource paths.
 
 [source,java]
 ----
@@ -395,9 +439,90 @@ This is implemented in the PersonPanel directly using the Button object.
                 ...
 ----
 
-The CLI version allows the user to specify the index of the person and directly update the image url.
+==== Add Image (CLI Version)
 
-This is implemented by updating the image field whenever the residentBook is updated.
+The CLI version allows the user to specify the index of the resident and directly update the image url from the command box.
+
+Validity of the given format is check initially, throwing an InvalidImageFormatException if file type is not one of `jpg/jpeg/png/bmp`.
+Subsequently, the validity of the index and the given image URL is checked.
+
+[source,java]
+----
+    public String validImageFormat(String imageUrl) throws InvalidImageFormatException {
+        String validFormatRegex = "(.+(\\.(?i)(jpg|jpeg|png|bmp))$)";
+        if (imageUrl.matches(validFormatRegex)) {
+            return imageUrl;
+        } else {
+            throw new InvalidImageFormatException(MESSAGE_INVALID_COMMAND_FORMAT);
+        }
+    }
+
+    public CommandResult executeUndoableCommand() throws CommandException {
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        if (!(new File(newImageUrl).exists())) {
+            throw new CommandException(Messages.MESSAGE_INVALID_IMAGE_URL);
+        }
+        ...
+----
+
+The image is then saved according to whether the app is run in production or development, through checking the validity of the jar resource path
+
+[source,java]
+----
+    public void createResidentImage(ReadOnlyPerson resident) {
+        File picFile = new File(newImageUrl);
+        try {
+            if (resident.getPicture().checkJarResourcePath()) {
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getJarPictureUrl()));
+            } else {
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getPictureUrl()));
+            }
+        } catch (Exception e) {
+            System.out.println("Cannot create Person Image");
+        }
+    }
+----
+
+The activity diagram below summarizes the sequence of execution:
+
+image::addImageActivityDiagram.png[width="500"]
+
+==== Delete Image (CLI Version)
+
+The CLI Delete Image allows the user to specify the index of the resident and directly update the image url from the command box, as long as the index passed is valid
+
+[source,java]
+----
+    public CommandResult executeUndoableCommand() throws CommandException {
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+        ...
+----
+
+The deletion of the image occurs as a resetting of the image url within the Picture of the resident
+
+[source,java]
+----
+    public Person resetPersonImage(ReadOnlyPerson resident) {
+        ...
+        Person editedResident =  new Person(name, phone, email, room, timestamp, tags);
+        return editedResident;
+    }
+----
+
+The activity diagram below summarizes the sequence of execution:
+
+image::deleteImageActivityDiagram.png[width="500"]
+
+The actual update of the image is implemented by reloading the `Person` passed to the PersonPanel whenever the residentBook is updated.
 
 [source,java]
 ----
@@ -407,15 +532,23 @@ This is implemented by updating the image field whenever the residentBook is upd
         loadPersonInformation(event.getNewSelection().person);
     }
 
-    /**
-     * loads the selected person's information to be displayed.
-     */
     private void loadPersonInformation(ReadOnlyPerson person) {
         this.person = updatePersonFromLogic(person);
         name.textProperty().setValue(person.getName().toString());
         phone.textProperty().setValue(person.getPhone().toString());
         ...
 ----
+
+==== Design Considerations
+
+* Alternatives Considered:
+
+* Alternative 1: Omit creation of resident's image
+Addition of images directly from the user specified path and not saving their duplicates was considered due to it's simplicity as well as having the added benefit of not saving a duplicate of the picture. However, this would also mean that it would be impossible for the application to be portable since the images could not be possibly be bundled together when the user wants to migrate the application to another platform.
+
+* Alternative 2: Implementing Add/Delete Image as UNDOABLE commands
+Implementing image commands as UNDOABLE commands would grant the user the convenience of adding back an image they accidentally deleted. However, the implementation of such a feature would be very complex (especially when 'alternative 1', omitting the resident's image is not an option). Furthermore, this would mean saving multiple images of the same person to allow for addition/deletion, which would be a huge burden on the space required to run the application.
+
 // end::picture[]
 
 // tag::autocomplete[]
@@ -448,6 +581,7 @@ The autocomplete list is obtained from the creation of an AutoComplete object an
         case "select":
         ...
 ----
+
 // end::autocomplete[]
 
 // tag::swaproom[]
@@ -533,6 +667,7 @@ The implementation of temporary persons has two parts: +
 . Deleting temporary persons
 
 ==== Timestamp
+* Updated user stories incording to user stories
 A Timestamp class has been implemented to record the time a person in the ResidentBook is created; more importantly, it
 records the time that a person will expire. A non-temporary person will never expire and has an expiry date of "null". On the other
  hand, a temporary person has an expiry time represented by the LocalDateTime class.
