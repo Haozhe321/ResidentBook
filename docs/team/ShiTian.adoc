@@ -113,6 +113,33 @@ include::../DeveloperGuide.adoc[tag=highlight]
 
 ---
 
+=== Enhancement Added: PersonPanel
+
+==== External behavior
+
+---
+#Start of Extract [from: User Guide]#
+
+include::../UserGuide.adoc[tag=personPanel]
+
+#End of Extract#
+
+---
+
+==== Justification
+
+Considering the hostel would have upwards of hundreds of people staying in the list of residents will be extremely long. Hence it would not be feasible to display all user information in the list panel itself. As such, it would be essential that extra user information be displayed on another panel for the Administrator to view. Person Panel is implemented for this exact reason.
+
+==== Implementation
+
+---
+#Start of Extract [from: Developer Guide]#
+
+include::../DeveloperGuide.adoc[tag=personPanel]
+
+#End of Extract#
+
+---
 === Other contributions
 
 * User Stories and Use Cases

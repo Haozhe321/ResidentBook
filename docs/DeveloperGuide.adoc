@@ -703,7 +703,7 @@ This is possible since `-` is an invalid tag name and would not be a valid tag t
 
 The following sequence diagram illustrates execution of the highlight command:
 
-image::deleteImageActivityDiagram.png[width="500"]
+image::highlightDiagram.png[width="1000"]
 
 ==== Design Considerations
 
