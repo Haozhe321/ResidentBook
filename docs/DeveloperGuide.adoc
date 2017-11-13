@@ -859,7 +859,7 @@ private void addUniquePerson(ReadOnlyResidentBook newList, ArrayList<String> nam
             }
             namesAdded.add(p.getName().fullName);
         }
-    }
+}
 ----
 
 The following method checks if there are any new Resident added to ResidentBook.
@@ -879,7 +879,7 @@ private String getNamesFeedback(ArrayList<String> namesAdded) throws NoUniqueImp
             }
         }
         return namesFeedback;
-    }
+}
 ----
 
 [NOTE]
@@ -925,7 +925,7 @@ One consideration for the chosen mechanism is that backup should aid during cris
     public void backupResidentBook(ReadOnlyResidentBook residentBook) throws IOException {
         saveResidentBook(residentBook, getDirAbsolutePath() + backup_location);
         backupImages();
-    }
+}
 ----
 
 Apart from the Resident details, Backup command also includes saving the images uploaded by user previously.
@@ -938,7 +938,7 @@ public void backupImages() throws IOException {
 
         handleImageBackupFolder(backupFolder, originalFolder);
         handleImagesBackupFiles(backupFolder, originalFolder);
-    }
+}
 ----
 
 Check is done to make sure that folder where images are saved exists before creating a backup folder. If the staff did not save any pictures for the Residents, no backup folder will be created.
@@ -957,7 +957,7 @@ private void handleImageBackupFolder(String backupFolder, String originalFolder)
                 }
             }
         }
-    }
+}
 ----
 
 If the staff saved images for the Residents, the images will be copied from the source folder to the backup folder as seen below.
@@ -976,7 +976,7 @@ private void handleImagesBackupFiles(String backupFolder, String originalFolder)
             }
         }
 
-    }
+}
 ----
 
 The following is the activity diagram of Backup Comand.
@@ -1207,7 +1207,7 @@ private void updateTagList(List<ReadOnlyPerson> lastShownList, int i) throws Com
         } catch (DuplicatePersonException e) {
             throw new CommandException(MESSAGE_REMOVE_TAG_ERROR);
         }
-    }
+}
 ----
 
 This following section shows how the Tag specified is removed. It loops through the TagList each person has, and creates another set of updated TagList. While there will not be a duplication of tag, this defensive code ensures that indeed all specified tag is removed.
@@ -1228,7 +1228,7 @@ private Person removedTagFromPerson(ReadOnlyPerson personToEdit) {
 
         return new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
                 personToEdit.getRoom(), personToEdit.getTimestamp(), updatedTags);
-    }
+}
 ----
 [NOTE]
 If the tagName is invalid, the TagNotFoundException will be raised.
