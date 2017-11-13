@@ -1,10 +1,12 @@
-= Testing Manual
+= Test Script
 :toc:
 :toc-title:
 :toc-placement: preamble
 :sectnums:
 :imagesDir: images
 :stylesDir: stylesheets
+:stylesheet: boot-readable.css
+:experimental:
 ifdef::env-github[]
 :tip-caption: :bulb:
 :note-caption: :information_source:
@@ -18,12 +20,13 @@ By: `Team F09-B1`      Since: `AUG 2017`      Licence: `MIT`
 
 1. Download the SampleData.zip and .jar file.
 2. Unzip the folder SampleData.zip.
-2. There are 4 files inside: residentbook.xml, eventbook.xml, exchangeStudent.xml and SampleImage.jpg.
+2. There are 4 files inside: _residentbook.xml_ , _eventbook.xml_ , _exchangeStudent.xml_ and _SampleImage.jpg_ .
 3. Put the .jar file into an empty folder.
 4. Create an empty folder inside this folder and name it "data".
-5. Go into the "data" folder, create an empty folder and name it "contact_images".
-6. Copy residentbook.xml and eventbook.xml and paste inside "data" folder.
-7. Double click the .jar file, the residents and events are now loaded into the ResidentBook.
+5. Go into the "data" folder.
+6. Copy all 4 files and paste inside "data" folder.
+7. Create an empty folder in the "data" folder and name it "contact_images".
+8. Double click the .jar file, the residents and events are now loaded into the ResidentBook.
 
 == Manual Testing
 
