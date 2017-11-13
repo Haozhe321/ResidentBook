@@ -20,9 +20,26 @@ ResidentBook uses Command line interface (CLI) as the primary source of input. A
 
 *Code contributed*: [https://github.com/CS2103AUG2017-F09-B1/main/blob/master/collated/main/sushinoya.md[Functional code]] [https://github.com/CS2103AUG2017-F09-B1/main/blob/master/collated/test/sushinoya.md[Test code]]
 
-== Commands Added:
+=== 1. UI Enhancement: `Designed and Built UI`
 
-=== 1. `Swap Room Command`
+==== Description
+
+* Designed all the mock-ups before and during the project
+* Implemented the entire UI including all the styling and interactivity (except the Calendar)
+
+==== Implementation
+
+---
+#Start of Styling Extract [from: Developer Guide]#
+
+include::../DeveloperGuide.adoc[tag=styling]
+
+#End of Styling Extract#
+
+---
+
+
+=== 2. Enhancement: `Swap Room Command`
 
 ==== External behavior
 
@@ -37,7 +54,7 @@ include::../UserGuide.adoc[tag=swaproom]
 
 ==== Justification
 
-One of the most common requests that hostel managers face is that to swap rooms with a friend. It is difficult for the managers to accomodate such events because swapping rooms entails other logistics issues that come with swapping rooms. This is made easy in Resident Book where swapping rooms is a simple one line command.
+Requests to swap rooms with other residents are very common in residential colleges and halls. The hostel management often finds it difficult to accomodate such a request because of the logistics that goes behind switching the rooms for two people. So, ResidentBook offers a simple command to execute swap rooms.
 
 ==== Implementation
 
@@ -51,7 +68,7 @@ include::../DeveloperGuide.adoc[tag=swaproom]
 ---
 
 
-=== 2. `Sort Command`
+=== 3. Enhancement: `Sort Command`
 
 ==== External behavior
 
@@ -83,7 +100,7 @@ include::../DeveloperGuide.adoc[tag=sort]
 ---
 
 
-=== 3. `Add Event Command`
+=== 4. Enhancement: `Add Event Command`
 
 ==== External behavior
 
@@ -112,7 +129,7 @@ include::../DeveloperGuide.adoc[tag=addEvent]
 
 ---
 
-=== 4. `Delete Event Command`
+=== 5. Enhancement: `Delete Event Command`
 
 ==== External behavior
 
@@ -141,7 +158,7 @@ include::../DeveloperGuide.adoc[tag=deleteEvent]
 ---
 
 
-=== 5. `Switch Tab Command`
+=== 6. Enhancement: `Switch Tab Command`
 
 ==== External behavior
 
@@ -171,34 +188,18 @@ include::../DeveloperGuide.adoc[tag=switchtab]
 ---
 
 
-== UI Enhancements:
-
-=== `Designed and Built UI`
-
-==== Description
-
-* Designed all the mock-ups before and during the project
-* Implemented the entire UI including all the styling and interactivity (except the Calendar)
-
-==== Implementation
-
----
-#Start of Extract [from: Developer Guide]#
-
-include::../DeveloperGuide.adoc[tag=styling]
-
-#End of Extract#
-
----
-
-== Model and Storage Level Enhancements:
-
-=== `Implemented EventsBook`
-
-==== Description
+=== 7. Enhancement: `Implemented EventsBook`
 
 * Implemented an entirely separate group of classes for storing and maintaining `events`.
 * Also implemented the UI and wrote all the tests for events.
+
+==== Justification
+
+* A hostel management staff needs to keep track of all the events which go on in the hostel for various reasons:
+* To keep track of room bookings and usage
+* Send out emails and notifications for upcoming events to everyone in the hostel
+* Look out for potential clash of events and prepare in advance
+* Organise hostel events when students do not have many other events so that all events are evenly spaced out
 
 ==== Implementation
 
@@ -214,6 +215,7 @@ include::../DeveloperGuide.adoc[tag=eventbook]
 === Other contributions
 * Modified the structure of commands such as `add` to allow flexible arguments.
 * Offered Flexible Add Command implementation (with all accompanying tests) for reuse: https://github.com/nus-cs2103-AY1718S1/forum/issues/126.
+* Wrote python script to generate GitHub issues and shared with on the CS2103 Slack channel
 * Wrote several utility methods for tests such as EventsUtil and EventsBuilder. Also, wrote a seeded data in SampleUtilData of 20 events and persons for testing and default boot-up.
 * Set-up basic testing and notification structure for the repository.
 * Contributed major overhauls to the codebase by changing AddressBook to ResidentBook and fixing all the accompanying tests and validations.
