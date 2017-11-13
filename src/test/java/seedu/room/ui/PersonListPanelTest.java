@@ -28,7 +28,7 @@ public class PersonListPanelTest extends GuiUnitTest {
                 PersonListPanelHandle.PERSON_LIST_VIEW_ID));
     }
 
-    /**
+    /*
     @Test
     public void display() {
         for (int i = 0; i < TYPICAL_PERSONS.size(); i++) {
