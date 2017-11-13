@@ -911,6 +911,8 @@ private void handleSwitchTabEvent(SwitchTabRequestEvent event) {
 }
 ----
 
+image::switch_tab_sequence_diagram.png
+
 Possible Future Implementations:
 
 * `switch` should be able to detect the current tab and switch without taking in any arguments.
@@ -943,6 +945,8 @@ public void sortBy(String sortCriteria) throws AlreadySortedException {
 ----
 
 This exception is later caught higher up the execution stack and a CommandException is thrown. The user receives a message that the list is already sorted by the field.
+
+image::sort_activity_diagram.png[width="400"]
 
 To enable the sorting, standard `FXCollections.sort` is used. To enable this, ReadOnlyPerson interface extends Comparable.
 The person Class which implements this interface defines compareTo to compare two fields. The following is a snippet from the compareTo method:
