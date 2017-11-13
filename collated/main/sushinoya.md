@@ -1,7 +1,7 @@
 # sushinoya
 ###### \java\seedu\room\commons\events\model\EventBookChangedEvent.java
 ``` java
-/** Indicates the ResidentBook in the model has changed*/
+/** Indicates the EventBook in the model has changed*/
 public class EventBookChangedEvent extends BaseEvent {
 
     public final ReadOnlyEventBook data;
@@ -40,6 +40,26 @@ public class EventPanelSelectionChangedEvent extends BaseEvent {
     }
 }
 ```
+###### \java\seedu\room\commons\events\ui\SwitchTabRequestEvent.java
+``` java
+/**
+ * An event requesting to switch tabs between Residents List and Events List.
+ */
+public class SwitchTabRequestEvent extends BaseEvent {
+
+    public final int targetIndex;
+
+    public SwitchTabRequestEvent(int targetIndex) {
+        this.targetIndex = targetIndex - 1;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
+}
+```
 ###### \java\seedu\room\commons\util\CommandUtil.java
 ``` java
 /**
@@ -73,14 +93,12 @@ public class AddEventCommand extends UndoableCommand {
             + PREFIX_TITLE + "TITLE "
             + PREFIX_DESCRIPTION + "DESCRIPTION "
             + PREFIX_LOCATION + "LOCATION "
-            + "[" + PREFIX_DATETIME + "STARTTIME TO ENDTIME"
-            + " or STARTTIME DURATION (in hours)]\n"
+            + "[" + PREFIX_DATETIME + "STARTTIME TO ENDTIME\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_TITLE + "End of Sem Dinner "
             + PREFIX_DESCRIPTION + "Organised by USC "
             + PREFIX_LOCATION + "Cinnamon College "
-            + PREFIX_DATETIME + "25/11/2017 2030 to 2359"
-            + " or " + PREFIX_DATETIME + "25/11/2017 2030 2";
+            + PREFIX_DATETIME + "25/11/2017 2030 to 2359";
 
     public static final String MESSAGE_SUCCESS = "New event added: %1$s";
     public static final String MESSAGE_DUPLICATE_EVENT = "This event already exists in the event book";
@@ -115,7 +133,7 @@ public class AddEventCommand extends UndoableCommand {
 ###### \java\seedu\room\logic\commands\DeleteEventCommand.java
 ``` java
 /**
- * Deletes a event identified using it's last displayed index from the resident book.
+ * Deletes a event identified using it's last displayed index from the event book.
  */
 public class DeleteEventCommand extends UndoableCommand {
 
@@ -229,7 +247,7 @@ public class SortCommand extends UndoableCommand {
 ###### \java\seedu\room\logic\commands\SwaproomCommand.java
 ``` java
 /**
- * Swaps two residents identified using their last displayed indexes from the resident book.
+ * Swaps two residents identified using indexes from the last displayed residents list.
  */
 public class SwaproomCommand extends UndoableCommand {
 
@@ -258,6 +276,7 @@ public class SwaproomCommand extends UndoableCommand {
 
         List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
 
+        //The index is larger than the last shown list.
         if (targetIndex1.getZeroBased() >= lastShownList.size()
                 || targetIndex2.getZeroBased() >= lastShownList.size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
@@ -266,7 +285,7 @@ public class SwaproomCommand extends UndoableCommand {
         ReadOnlyPerson person1 = lastShownList.get(targetIndex1.getZeroBased());
         ReadOnlyPerson person2 = lastShownList.get(targetIndex2.getZeroBased());
 
-
+        //If both of the residents have not been allocated rooms, disallow swap.
         if (person1.getRoom().toString().equals(ROOM_NOT_SET_DEFAULT)
                 && person2.getRoom().toString().equals(ROOM_NOT_SET_DEFAULT)) {
             throw new CommandException(String.format(ROOMS_NOT_SET_ERROR, person1.getName(), person2.getName()));
@@ -282,7 +301,7 @@ public class SwaproomCommand extends UndoableCommand {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(Object other) { // swaproom A B is equal to swaproom B A
         return other == this // short circuit if same object
                 || (other instanceof SwaproomCommand // instanceof handles nulls
                 && this.targetIndex1.equals(((SwaproomCommand) other).targetIndex1)
@@ -293,87 +312,54 @@ public class SwaproomCommand extends UndoableCommand {
     }
 }
 ```
-###### \java\seedu\room\logic\parser\AddCommandParser.java
+###### \java\seedu\room\logic\commands\SwitchTabCommand.java
 ``` java
-    /**
-     * Parses the given {@code String} of arguments in the context of the AddCommand
-     * and returns an AddCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public AddCommand parse(String args) throws ParseException {
+/**
+ * Switches between Residents tab and Events tab.
+ */
+public class SwitchTabCommand extends Command {
 
-        Phone phone;
-        Email email;
-        Room room;
-        Timestamp timestamp;
+    public static final String COMMAND_WORD = "switch";
+    public static final String COMMAND_ALIAS = "sw";
 
-        ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ROOM,
-                        PREFIX_TEMPORARY, PREFIX_TAG);
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Switches between Residents tab and Events tab.\n"
+            + "Parameters: INDEX (must 1 or 2)\n"
+            + "Example: " + COMMAND_WORD + " 1";
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_NAME)) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
-        }
+    public static final String MESSAGE_SWITCH_TAB_SUCCESS = "Switched to %1$s tab";
 
-        try {
-            //Gets the name of the person being added
-            Name name = ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME)).get();
+    private final int targetIndex;
+    private final String tabName;
 
-            //Gets the phone of the person being added. If no phone is provided, it creates a phone with null as value
-            Optional<Phone> optionalPhone = ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE));
-            if (optionalPhone.isPresent()) {
-                phone = optionalPhone.get();
-            } else {
-                phone = new Phone(null);
-            }
-
-            //Gets the email of the person being added. If no email is provided, it creates an email with null as value
-            Optional<Email> optionalEmail = ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL));
-            if (optionalEmail.isPresent()) {
-                email = optionalEmail.get();
-            } else {
-                email = new Email(null);
-            }
-
-            //Gets the room of the person being added. If no room is provided, it creates an room with null
-            //as value
-            Optional<Room> optionalRoom = ParserUtil.parseRoom(argMultimap.getValue(PREFIX_ROOM));
-            if (optionalRoom.isPresent()) {
-                room = optionalRoom.get();
-            } else {
-                room = new Room(null);
-            }
-
-            //Gets the temporary duration of the person being added. If no temporary duration is provided,
-            // it creates a person with permanent duration
-            Optional<Timestamp> optionalTimestamp = ParserUtil.parseTimestamp(argMultimap.getValue(PREFIX_TEMPORARY));
-            if (optionalTimestamp.isPresent()) {
-                timestamp = optionalTimestamp.get();
-            } else {
-                timestamp = new Timestamp(0);
-            }
-
-
-            Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
-
-            ReadOnlyPerson person = new Person(name, phone, email, room, timestamp, tagList);
-
-            return new AddCommand(person);
-        } catch (IllegalValueException ive) {
-            throw new ParseException(ive.getMessage(), ive);
-        } catch (NumberFormatException nfe) {
-            throw new ParseException("Invalid number format for timestamp", nfe);
+    public SwitchTabCommand(int targetIndex) {
+        this.targetIndex = targetIndex;
+        if (targetIndex == 1) {
+            tabName = "Residents";
+        } else if (targetIndex == 2) {
+            tabName = "Events";
+        } else {
+            tabName = "";
         }
     }
 
-    /**
-     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
-     * {@code ArgumentMultimap}.
-     */
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    @Override
+    public CommandResult execute() throws CommandException {
+
+        if (targetIndex > 2 || targetIndex < 1) {
+            throw new CommandException(MESSAGE_USAGE);
+        }
+
+        EventsCenter.getInstance().post(new SwitchTabRequestEvent(targetIndex));
+        return new CommandResult(String.format(MESSAGE_SWITCH_TAB_SUCCESS, tabName));
     }
 
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof SwitchTabCommand // instanceof handles nulls
+                && this.targetIndex == (((SwitchTabCommand) other).targetIndex)); // state check
+    }
 }
 ```
 ###### \java\seedu\room\logic\parser\AddEventCommandParser.java
@@ -476,10 +462,32 @@ public class DeleteEventCommandParser implements Parser<DeleteEventCommand> {
 
 }
 ```
+###### \java\seedu\room\logic\parser\ResidentBookParser.java
+``` java
+        case SortCommand.COMMAND_WORD:
+        case SortCommand.COMMAND_ALIAS:
+            return new SortCommandParser().parse(arguments);
+
+        case SwaproomCommand.COMMAND_WORD:
+        case SwaproomCommand.COMMAND_ALIAS:
+            return new SwaproomCommandParser().parse(arguments);
+
+        case SwitchTabCommand.COMMAND_WORD:
+        case SwitchTabCommand.COMMAND_ALIAS:
+            return new SwitchTabCommandParser().parse(arguments);
+
+        case AddEventCommand.COMMAND_WORD:
+        case AddEventCommand.COMMAND_ALIAS:
+            return new AddEventCommandParser().parse(arguments);
+
+        case DeleteEventCommand.COMMAND_WORD:
+        case DeleteEventCommand.COMMAND_ALIAS:
+            return new DeleteEventCommandParser().parse(arguments);
+```
 ###### \java\seedu\room\logic\parser\SortCommandParser.java
 ``` java
 /**
- * Parses input arguments and creates a new AddCommand object
+ * Parses input arguments and creates a new SortCommand object
  */
 public class SortCommandParser implements Parser<SortCommand> {
 
@@ -510,19 +518,18 @@ public class SortCommandParser implements Parser<SortCommand> {
 ###### \java\seedu\room\logic\parser\SwaproomCommandParser.java
 ``` java
 /**
- * Parses input arguments and creates a new DeleteCommand object
+ * Parses input arguments and creates a new SwaproomCommand object
  */
 public class SwaproomCommandParser implements Parser<SwaproomCommand> {
 
     /**
-     * Parses the given {@code String} of arguments in the context of the DeleteCommand
-     * and returns an DeleteCommand object for execution.
+     * Parses the given {@code String} of arguments in the context of the SwaproomCommand
+     * and returns an SwaproomCommand object for execution.
      * @throws ParseException if the user input does not conform the expected format
      */
     public SwaproomCommand parse(String args) throws ParseException {
         try {
             String[] indexes = args.split("\\s+");
-
             if (indexes.length != 3) {
                 throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, SwaproomCommand.MESSAGE_USAGE));
@@ -536,7 +543,34 @@ public class SwaproomCommandParser implements Parser<SwaproomCommand> {
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, SwaproomCommand.MESSAGE_USAGE));
         }
     }
+}
+```
+###### \java\seedu\room\logic\parser\SwitchTabCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new SwitchTabCommand object
+ */
+public class SwitchTabCommandParser implements Parser<SwitchTabCommand> {
 
+    /**
+     * Parses the given {@code String} of arguments in the context of the SwitchTabCommand
+     * and returns an SwitchTabCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public SwitchTabCommand parse(String args) throws ParseException {
+        try {
+            int index = ParserUtil.parseIndex(args).getOneBased();
+
+            if (index > 2 || index < 1) {
+                throw new IllegalValueException(MESSAGE_INVALID_COMMAND_FORMAT);
+            }
+
+            return new SwitchTabCommand(index);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, SwitchTabCommand.MESSAGE_USAGE));
+        }
+    }
 }
 ```
 ###### \java\seedu\room\model\event\Datetime.java
@@ -559,6 +593,9 @@ public class Datetime {
     public static final String INVALID_TIME_FORMAT =
             "Time should be represented only by digits and in the format hhmm";
 
+    public static final String MULTIPLE_DAY_EVENT_ERROR =
+            "The event should end on the same day";
+
     public final String value;
     public final LocalDateTime datetime;
 
@@ -571,6 +608,10 @@ public class Datetime {
         try {
             if (!isValidDatetime(datetime)) {
                 throw new IllegalValueException(MESSAGE_DATETIME_CONSTRAINTS);
+            }
+
+            if (!isSingleDayEvent(datetime)) {
+                throw new IllegalValueException(MULTIPLE_DAY_EVENT_ERROR);
             }
 
             //Update datetime
@@ -597,7 +638,6 @@ public class Datetime {
 
             //Store as a LocalDateTime object
             this.datetime = this.toLocalDateTime(components[0] + " " + starttimeString);
-
             this.value = date + " " + starttimeString + " to " + endtimeString;
 
         } catch (DateTimeException e) {
@@ -616,23 +656,41 @@ public class Datetime {
     }
 
     /**
-     * Returns true if a given string is a valid datetime in the format dd/mm/yyyy hhmm k.
+     * Returns true if a given string is a valid datetime in the format dd/mm/yyyy hhmm k or dd/mm/yyyy hhmm to hhmm.
      */
     public static boolean isValidDatetime(String test) {
-
         String[] components = test.split(" ");
+        String date = components[0];
+        String startTime = components[1];
 
         //If the format is dd/mm/yyyy hhmm k
         if (components.length == 3) {
-            return isValidDate(components[0]) && isValidTime(components[1]) && isValidDuration(components[2]);
+            String duration = components[2];
+            return isValidDate(date) && isValidTime(startTime) && isValidDuration(duration);
         //If the format is dd/mm/yyyy hhmm to hhmm
         } else if (components.length == 4) {
+            String endtime = components[3];
+            return isValidDate(date) && isValidTime(startTime) && isValidTime(endtime);
+        } else {
+            return false;
+        }
+    }
 
-            for (String k : components) {
-            }
+    /**
+     * Returns true if the event ends on the same day and false if it overflows to the next day
+     */
+    public static boolean isSingleDayEvent(String test) {
+        String[] components = test.split(" ");
+        String startTime = components[1];
 
-
-            return isValidDate(components[0]) && isValidTime(components[1]) && isValidTime(components[3]);
+        //If the format is dd/mm/yyyy hhmm k
+        if (components.length == 3) {
+            String duration = components[2];
+            return endOnTheSameDay (startTime, duration);
+        //If the format is dd/mm/yyyy hhmm to hhmm
+        } else if (components.length == 4) {
+            String endtime = components[3];
+            return endTimeAfterStart(startTime, endtime);
         } else {
             return false;
         }
@@ -723,6 +781,39 @@ public class Datetime {
             return updatedString;
         } else {
             throw new IllegalValueException(INVALID_TIME_FORMAT);
+        }
+    }
+
+    /**
+     * Returns true if the event ends on the same day and false if it overflows to the next day
+     */
+    public static Boolean endOnTheSameDay(String startTimeString, String durationString) {
+        assert(isValidTime(startTimeString));
+        assert(isValidDuration(durationString));
+
+        int startTime = Integer.parseInt(startTimeString);
+        int duration = Integer.parseInt(durationString);
+        int endTime = startTime + 100 * duration;
+        if (endTime > 2359) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Returns true if the event ends on the same day and false if it overflows to the next day
+     */
+    public static Boolean endTimeAfterStart(String startTimeString, String endtimeString) {
+        assert(isValidTime(startTimeString));
+        assert(isValidTime(endtimeString));
+
+        int startTime = Integer.parseInt(startTimeString);
+        int endTime = Integer.parseInt(endtimeString);
+        if (startTime > endTime) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -930,6 +1021,7 @@ public class Event implements ReadOnlyEvent {
                 && this.datetime.getValue().equals(otherEvent.datetime.getValue());
     }
 
+    //@@ author
     @Override
     public int compareTo(Object otherEvent) {
 
@@ -1058,7 +1150,7 @@ public interface ReadOnlyEvent extends Comparable {
     }
 
     /**
-     * Formats the person as text, showing all contact details.
+     * Formats the event as text, showing all contact details.
      */
     default String getAsText() {
         final StringBuilder builder = new StringBuilder();
@@ -1158,7 +1250,7 @@ public class TitleContainsKeywordsPredicate implements Predicate<ReadOnlyEvent> 
 ###### \java\seedu\room\model\event\UniqueEventList.java
 ``` java
 /**
- * A list of persons that enforces uniqueness between its elements and does not allow nulls.
+ * A list of events that enforces uniqueness between its elements and does not allow nulls.
  * <p>
  * Supports a minimal set of list operations.
  *
@@ -1314,7 +1406,7 @@ public class EventBook implements ReadOnlyEventBook {
         resetData(toBeCopied);
     }
 
-    //// list overwrite operations
+    //// List Overwrite Operations
 
     public void setEvents(List<? extends ReadOnlyEvent> events) throws DuplicateEventException {
         this.events.setEvents(events);
@@ -1332,7 +1424,7 @@ public class EventBook implements ReadOnlyEventBook {
         }
     }
 
-    //// event-level operations
+    //// Event-Level Operations
 
     /**
      * Adds an event to the event book.
@@ -1371,9 +1463,9 @@ public class EventBook implements ReadOnlyEventBook {
         }
     }
 
-    //// sort resident book
+    //// Sort Event Book
     /**
-     * Sorts the UniquePersonList, persons.
+     * Sorts the UniqueEventList, events.
      *
      * @throws AlreadySortedException if the list is already sorted by given criteria.
      */
@@ -1387,7 +1479,7 @@ public class EventBook implements ReadOnlyEventBook {
     }
 
 
-    //// util methods
+    //// Util Methods
 
     @Override
     public String toString() {
@@ -1431,9 +1523,6 @@ public class EventBook implements ReadOnlyEventBook {
 
     //=========== Swapping Residents' Rooms =============================================================
 
-```
-###### \java\seedu\room\model\ModelManager.java
-``` java
     /**
      * Swaps the rooms between two residents.
      *
@@ -1502,65 +1591,6 @@ public class EventBook implements ReadOnlyEventBook {
 
 }
 ```
-###### \java\seedu\room\model\person\Person.java
-``` java
-    /**
-     * Sets the field the list should be sorted by
-     */
-    public void setComparator(String field) {
-        Set<String> validFields = new HashSet<String>(Arrays.asList(
-                new String[] {"name", "phone", "email", "room"}
-        ));
-
-        if (validFields.contains(field)) {
-            this.sortCriteria = field;
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-```
-###### \java\seedu\room\model\person\Person.java
-``` java
-    /**
-    * CompareTo function to allow implementing Comparable
-    */
-    @Override
-    public int compareTo(Object otherPerson) {
-
-        ReadOnlyPerson person = (ReadOnlyPerson) otherPerson;
-        String firstField = this.getName().toString();
-        String secondField = person.getName().toString();
-
-        if (sortCriteria.equals("email")) {
-            firstField = this.getEmail().toString();
-            secondField = person.getEmail().toString();
-
-        } else if (sortCriteria.equals("phone")) {
-            firstField = this.getPhone().toString();
-            secondField = person.getPhone().toString();
-
-        } else if (sortCriteria.equals("room")) {
-            firstField = this.getRoom().toString();
-            secondField = person.getRoom().toString();
-        } else {
-            return firstField.compareTo(secondField);
-        }
-
-        // If a field is "Not Set" put the corresponding person at the end of the list.
-        if (firstField.equals("Not Set") && secondField.equals("Not Set")) {
-            return 0;
-        } else if (!firstField.equals("Not Set") && secondField.equals("Not Set")) {
-            return -1;
-        } else if (firstField.equals("Not Set") && !secondField.equals("Not Set")) {
-            return 1;
-        } else {
-            return firstField.compareTo(secondField);
-        }
-    }
-
-}
-```
 ###### \java\seedu\room\model\person\Room.java
 ``` java
 /**
@@ -1574,10 +1604,6 @@ public class Room {
                    + "UUU is unit number and A is an optional letter "
                    + "to denote exact room within a suite";
 
-    /*
-     * The first character of the room must not be a whitespace,
-     * otherwise " " (a blank string) becomes a valid input.
-     */
     public static final String ROOM_VALIDATION_REGEX = "\\d{2}-\\d{3}[A-Z]?";
     public static final String ROOM_NOT_SET_DEFAULT = "Not Set";
 
@@ -1644,7 +1670,6 @@ public interface ReadOnlyEventBook {
 ``` java
     /**
      * Sorts the UniquePersonList, persons.
-     *
      * @throws AlreadySortedException if the list is already sorted by given criteria.
      */
     public void sortBy(String sortCriteria) throws AlreadySortedException {
@@ -1656,10 +1681,6 @@ public interface ReadOnlyEventBook {
         }
     }
 
-    ////
-```
-###### \java\seedu\room\model\ResidentBook.java
-``` java
     /**
      * Swaps the rooms between two residents.
      * @throws PersonNotFoundException if the persons specified are not found in the list.
@@ -1668,44 +1689,6 @@ public interface ReadOnlyEventBook {
         throws PersonNotFoundException {
         persons.swapRooms(person1, person2);
     }
-
-    //// util methods
-
-    @Override
-    public String toString() {
-        return persons.asObservableList().size() + " persons, " + tags.asObservableList().size() + " tags";
-        // TODO: refine later
-    }
-
-    @Override
-    public ObservableList<ReadOnlyPerson> getPersonList() {
-        return persons.asObservableList();
-    }
-
-    public UniquePersonList getUniquePersonList() {
-        return persons;
-    }
-
-    @Override
-    public ObservableList<Tag> getTagList() {
-        return tags.asObservableList();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof ResidentBook // instanceof handles nulls
-                && this.persons.equals(((ResidentBook) other).persons)
-                && this.tags.equalsOrderInsensitive(((ResidentBook) other).tags));
-    }
-
-    @Override
-    public int hashCode() {
-        // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(persons, tags);
-    }
-
-}
 ```
 ###### \java\seedu\room\model\util\SampleDataUtil.java
 ``` java
@@ -1721,20 +1704,20 @@ public class SampleDataUtil {
                     getTagSet("professor")),
 
                 new Person(new Name("Bernice Yu"), new Phone("99272758"), new Email("berniceyu@example.com"),
-                    new Room("09-100A"), new Timestamp(0),
-                    getTagSet("level10", "RA")),
+                    new Room("10-100A"), new Timestamp(0),
+                    getTagSet("year1", "RA")),
 
                 new Person(new Name("Charlotte Oliveiro"), new Phone("93210283"), new Email("charlotte@example.com"),
                     new Room("21-118"), new Timestamp(0),
-                    getTagSet("level16")),
+                    getTagSet("year2")),
 
                 new Person(new Name("David Li"), new Phone("91023282"), new Email("lidavid@example.com"),
                     new Room("26-105"), new Timestamp(0),
-                    getTagSet("level17")),
+                    getTagSet("year2")),
 
                 new Person(new Name("Irfan Ibrahim"), new Phone("92492321"), new Email("irfan@example.com"),
                     new Room("17-135F"), new Timestamp(0),
-                    getTagSet("level18")),
+                    getTagSet("year1")),
 
                 new Person(new Name("Roy Balakrishnan"), new Phone("92624417"), new Email("royb@example.com"),
                     new Room("12-120E"), new Timestamp(0),
@@ -1746,19 +1729,19 @@ public class SampleDataUtil {
 
                 new Person(new Name("Peter Vail"), new Phone("99098758"), new Email("peter@example.com"),
                     new Room("05-150A"), new Timestamp(0),
-                    getTagSet("level21", "RA")),
+                    getTagSet("Professor", "RA")),
 
                 new Person(new Name("Shawna Metzger"), new Phone("98383283"), new Email("shwana@example.com"),
                     new Room("20-119"), new Timestamp(0),
-                    getTagSet("level12")),
+                    getTagSet("year2")),
 
                 new Person(new Name("Varun Gupta"), new Phone("91030982"), new Email("varun@example.com"),
                     new Room("30-115"), new Timestamp(0),
-                    getTagSet("level7")),
+                    getTagSet("year3")),
 
                 new Person(new Name("Govind Koyal"), new Phone("92412321"), new Email("govind@example.com"),
                     new Room("16-134F"), new Timestamp(0),
-                    getTagSet("level9", "NUSSU")),
+                    getTagSet("year1", "NUSSU")),
 
                 new Person(new Name("James Hobbit"), new Phone("92620917"), new Email("jamesh@example.com"),
                     new Room("04-120"), new Timestamp(0),
@@ -1770,19 +1753,19 @@ public class SampleDataUtil {
 
                 new Person(new Name("Sherlock Holmes"), new Phone("90982758"), new Email("sherlock@example.com"),
                     new Room("16-100A"), new Timestamp(0),
-                    getTagSet("level5", "RA")),
+                    getTagSet("year1", "RA")),
 
                 new Person(new Name("Harry Jones"), new Phone("93211233"), new Email("harry@example.com"),
                     new Room("07-118"), new Timestamp(0),
-                    getTagSet("level6", "staff", "helper")),
+                    getTagSet("year2", "staff", "helper")),
 
                 new Person(new Name("Katniss Mallark"), new Phone("92981282"), new Email("kat92@example.com"),
                     new Room("03-115"), new Timestamp(0),
-                    getTagSet("level8")),
+                    getTagSet("year3", "NUSSU")),
 
                 new Person(new Name("James T Kirk"), new Phone("98765654"), new Email("kirk@example.com"),
                     new Room("04-135F"), new Timestamp(0),
-                    getTagSet("level19")),
+                    getTagSet("year4")),
 
                 new Person(new Name("Luna Lovegood"), new Phone("92620977"), new Email("luna@example.com"),
                     new Room("21-130"), new Timestamp(0),
@@ -1790,11 +1773,11 @@ public class SampleDataUtil {
 
                 new Person(new Name("Dolores Umbridge"), new Phone("91928282"), new Email("dolores@example.com"),
                     new Room("16-115"), new Timestamp(0),
-                    getTagSet("level8")),
+                    getTagSet("year1")),
 
                 new Person(new Name("Abeforth"), new Phone("92491321"), new Email("abeforth@example.com"),
                     new Room("15-132"), new Timestamp(0),
-                    getTagSet("level20"))
+                    getTagSet("year3"))
             };
         } catch (IllegalValueException e) {
             throw new AssertionError("sample data cannot be invalid", e);
@@ -1895,6 +1878,7 @@ public class SampleDataUtil {
             throw new AssertionError("sample data cannot contain duplicate events", e);
         }
     }
+
     /**
      * Returns a tag set containing the list of strings given.
      */
@@ -2007,7 +1991,6 @@ public class XmlAdaptedEvent {
 
     /**
      * Converts this jaxb-friendly adapted event object into the model's Event object.
-     *
      * @throws IllegalValueException if there were any data constraints violated in the adapted event
      */
     public Event toModelType() throws IllegalValueException {
@@ -2267,6 +2250,30 @@ public class EventListPanel extends UiPart<Region> {
     }
 }
 ```
+###### \java\seedu\room\ui\MainWindow.java
+``` java
+    public void switchTab(int index) {
+        tabPane.getSelectionModel().select(index);
+    }
+
+    @Subscribe
+    private void handleSwitchTabEvent(SwitchTabRequestEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        switchTab(event.targetIndex);
+    }
+
+    @Subscribe
+    private void handlePersonPanelSelectionChange(PersonPanelSelectionChangedEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        switchTab(0);
+    }
+
+    @Subscribe
+    public void handleResidentBoxPanelChange(ResidentBookChangedEvent event) {
+        switchTab(0);
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+    }
+```
 ###### \resources\view\DarkTheme.css
 ``` css
 
@@ -2337,54 +2344,6 @@ public class EventListPanel extends UiPart<Region> {
 
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: #232A34;
-}
-
-
-/*TAB AND TAB PANE STYLING*/
-.tab-pane {
-    -fx-padding: 0 0 0 1;
-    -fx-background-color: #232A34;
-}
-
-.tab-pane .tab-header-area {
-    -fx-background-color: #232A34;
-    -fx-padding: 0 0 0 0;
-    -fx-min-height: 0;
-    -fx-max-height: 0;
-}
-
-.tab-pane .tab-header-area .tab-header-background {
-    -fx-opacity: 0;
-}
-
-.tab-pane {
-    -fx-tab-min-width:115px;
-}
-
-.tab {
-    -fx-background-insets: 0 1 0 1,0,0;
-}
-
-.tab-pane .tab {
-    -fx-background-color: #404040;
-
-}
-
-.tab-pane .tab:selected {
-    -fx.border-color: transparent !important;
-    -fx-background-color: #336D1C;
-}
-
-.tab .tab-label {
-    -fx-alignment: CENTER;
-    -fx-text-fill: #f3f3f3;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.tab:selected .tab-label {
-    -fx.border-color: transparent !important;
-    -fx-text-fill: white;
 }
 
 
@@ -2591,6 +2550,54 @@ public class EventListPanel extends UiPart<Region> {
     -fx-fill: white;
     -fx-text-fill: white;
 }
+/*TAB AND TAB PANE STYLING*/
+
+.tab-pane {
+    -fx-padding: 0 0 0 1;
+    -fx-background-color: #232A34;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #232A34;
+    -fx-padding: 0 0 0 0;
+    -fx-min-height: 0;
+    -fx-max-height: 0;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-opacity: 0;
+}
+
+.tab-pane {
+    -fx-tab-min-width:115px;
+}
+
+.tab {
+    -fx-background-insets: 0 1 0 1,0,0;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #404040;
+
+}
+
+.tab-pane .tab:selected {
+    -fx.border-color: transparent !important;
+    -fx-background-color: #336D1C;
+}
+
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: #f3f3f3;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.tab:selected .tab-label {
+    -fx.border-color: transparent !important;
+    -fx-text-fill: white;
+}
+
 
 
 /*SCROLL BAR STYLING*/
@@ -2676,17 +2683,6 @@ public class EventListPanel extends UiPart<Region> {
     -fx-text-fill: #A6A6A6;
 }
 
-.auto-complete-popup .list-cell {
-    -fx-background-color: transparent;
-    -fx-font-size: 11pt;
-}
-
-.auto-complete-popup .clipped-container {
-    -fx-font-family: "Verdana";
-    -fx-background-color: grey;
-    -fx-background-radius: 2px;
-}
-
 #filterField, #personListPanel, #personWebpage {
     -fx-effect: innershadow(gaussian, black, 10, 0, 0, 0);
 }
@@ -2721,7 +2717,7 @@ public class EventListPanel extends UiPart<Region> {
 #personDetailsBox {
     -fx-padding: 20 20 20 20;
     -fx-background-color: #404040;
-    -fx-text-color: white !important;
+    -fx-text-color: white;
 }
 
 #personDetailsBox #name {
@@ -2729,10 +2725,11 @@ public class EventListPanel extends UiPart<Region> {
 }
 
 #name, #phone, #address, #email {
-    -fx-text-fill: white !important;
+    -fx-text-fill: white;
 }
 
 .label {
     -fx-text-fill: #C99733;
 }
+
 ```
