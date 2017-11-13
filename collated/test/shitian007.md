@@ -1,22 +1,6 @@
 # shitian007
 ###### \java\seedu\room\logic\AutoCompleteTest.java
 ``` java
-package seedu.room.logic;
-
-import static org.junit.Assert.assertTrue;
-import static seedu.room.testutil.TypicalPersons.getTypicalResidentBook;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import seedu.room.model.Model;
-import seedu.room.model.ModelManager;
-import seedu.room.model.UserPrefs;
-import seedu.room.model.person.ReadOnlyPerson;
-
 public class AutoCompleteTest {
 
     private AutoComplete autoComplete;
@@ -29,34 +13,46 @@ public class AutoCompleteTest {
 
     @Test
     public void assert_baseCommandsMatchUponCreation_success() {
-        String[] actualBaseCommands = { "add", "addEvent", "addImage", "backup", "edit", "select", "delete",
-            "deleteByTag", "deleteEvent", "deleteImage", "deleteTag", "clear", "find", "list", "highlight", "history",
-            "import", "exit", "help", "undo", "redo", "sort", "swaproom"
-        };
         String[] baseCommands = autoComplete.getAutoCompleteList();
-        assertTrue(Arrays.equals(actualBaseCommands, baseCommands));
+        assertTrue(Arrays.equals(AutoComplete.BASE_COMMANDS, baseCommands));
     }
 
     @Test
-    public void assert_autoCompleteListUpdate_success() {
-        List<ReadOnlyPerson> persons = model.getFilteredPersonList();
+    public void assert_autoCompleteListNamesUpdate_success() {
+        List<ReadOnlyPerson> residents = model.getFilteredPersonList();
         autoComplete.updateAutoCompleteList("find");
         String[] updatedList = autoComplete.getAutoCompleteList();
-        for (int i = 0; i < persons.size(); i++) {
-            String findPersonString = "find " + persons.get(i).getName().toString();
+
+        for (int i = 0; i < residents.size(); i++) {
+            String findPersonString = "find " + residents.get(i).getName().toString();
             assertTrue(findPersonString.equals(updatedList[i]));
         }
     }
 
     @Test
+    public void assert_autoCompleteListIndexUpdate_success() {
+        List<ReadOnlyPerson> residents = model.getFilteredPersonList();
+        autoComplete.updateAutoCompleteList("edit");
+        String[] updatedList = autoComplete.getAutoCompleteList();
+
+        for (int i = 0; i < residents.size(); i++) {
+            String editResidentIndex = "edit " + (i + 1);
+            assertTrue(editResidentIndex.equals(updatedList[i]));
+        }
+    }
+
+    @Test
     public void assert_resetAutoCompleteListMatchBaseCommands_success() {
-        String[] actualBaseCommands = { "add", "addEvent", "addImage", "backup", "edit", "select", "delete",
-            "deleteByTag", "deleteEvent", "deleteImage", "deleteTag", "clear", "find", "list", "highlight", "history",
-            "import", "exit", "help", "undo", "redo", "sort", "swaproom"
-        };
+        autoComplete.resetAutocompleteList();
+        String[] baseCommands = autoComplete.getAutoCompleteList();
+        assertTrue(Arrays.equals(AutoComplete.BASE_COMMANDS, baseCommands));
+    }
+
+    @Test
+    public void assert_autoCompleteListResetOnEmptyStringInput_success() {
         autoComplete.updateAutoCompleteList("");
         String[] baseCommands = autoComplete.getAutoCompleteList();
-        assertTrue(Arrays.equals(actualBaseCommands, baseCommands));
+        assertTrue(Arrays.equals(AutoComplete.BASE_COMMANDS, baseCommands));
     }
 }
 ```
@@ -81,26 +77,6 @@ public class AutoCompleteTest {
 ```
 ###### \java\seedu\room\logic\commands\AddImageCommandTest.java
 ``` java
-package seedu.room.logic.commands;
-
-import static seedu.room.logic.commands.CommandTestUtil.assertCommandFailure;
-import static seedu.room.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.room.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
-import static seedu.room.testutil.TypicalPersons.getTypicalResidentBook;
-
-import org.junit.Test;
-
-import seedu.room.commons.core.Messages;
-import seedu.room.commons.core.index.Index;
-import seedu.room.logic.CommandHistory;
-import seedu.room.logic.UndoRedoStack;
-import seedu.room.model.Model;
-import seedu.room.model.ModelManager;
-import seedu.room.model.ResidentBook;
-import seedu.room.model.UserPrefs;
-import seedu.room.model.person.Person;
-import seedu.room.model.person.Picture;
-
 public class AddImageCommandTest {
 
     private Model model = new ModelManager(getTypicalResidentBook(), new UserPrefs());
@@ -147,6 +123,40 @@ public class AddImageCommandTest {
         assertCommandFailure(addImageCommand, model, expectedMessage);
     }
 
+    @Test
+    public void equals() {
+        Index index1 = Index.fromOneBased(1);
+        Index index2 = Index.fromOneBased(2);
+        String urlAlice = "/pictures/Alice.jpg";
+        String urlBob = "/pictures/Bob.jpg";
+        AddImageCommand addImageCommandAliceIndex1 = new AddImageCommand(index1, urlAlice);
+        AddImageCommand addImageCommandAliceIndex1Duplicate = new AddImageCommand(index1, urlAlice);
+        AddImageCommand addImageCommandAliceIndex2 = new AddImageCommand(index2, urlAlice);
+        AddImageCommand addImageCommandBobIndex1 = new AddImageCommand(index1, urlBob);
+        AddImageCommand addImageCommandBobIndex2 = new AddImageCommand(index2, urlBob);
+
+        // same object -> returns true
+        assertTrue(addImageCommandAliceIndex1.equals(addImageCommandAliceIndex1));
+
+        // different object same arguments -> returns true
+        assertTrue(addImageCommandAliceIndex1.equals(addImageCommandAliceIndex1Duplicate));
+
+        // different indexes -> returns false
+        assertFalse(addImageCommandAliceIndex1.equals(addImageCommandAliceIndex2));
+
+        // different image url -> returns false
+        assertFalse(addImageCommandAliceIndex1.equals(addImageCommandBobIndex1));
+
+        // different image and index -> returns false
+        assertFalse(addImageCommandAliceIndex1.equals(addImageCommandBobIndex2));
+
+        // different object type -> returns false
+        assertFalse(addImageCommandAliceIndex1.equals(index1));
+
+        // null -> returns false
+        assertFalse(addImageCommandAliceIndex1.equals(null));
+    }
+
     /**
      * Returns an {@code AddImageCommand} with parameters {@code index} and {@code imageURL}
      */
@@ -159,26 +169,6 @@ public class AddImageCommandTest {
 ```
 ###### \java\seedu\room\logic\commands\DeleteImageCommandTest.java
 ``` java
-package seedu.room.logic.commands;
-
-import static seedu.room.logic.commands.CommandTestUtil.assertCommandFailure;
-import static seedu.room.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.room.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
-import static seedu.room.testutil.TypicalPersons.getTypicalResidentBook;
-
-import org.junit.Test;
-
-import seedu.room.commons.core.Messages;
-import seedu.room.commons.core.index.Index;
-import seedu.room.logic.CommandHistory;
-import seedu.room.logic.UndoRedoStack;
-import seedu.room.model.Model;
-import seedu.room.model.ModelManager;
-import seedu.room.model.ResidentBook;
-import seedu.room.model.UserPrefs;
-import seedu.room.model.person.Person;
-import seedu.room.model.person.Picture;
-
 public class DeleteImageCommandTest {
 
     private Model model = new ModelManager(getTypicalResidentBook(), new UserPrefs());
@@ -211,6 +201,30 @@ public class DeleteImageCommandTest {
         assertCommandFailure(deleteImageCommand, model, expectedMessage);
     }
 
+    @Test
+    public void equals() {
+        Index index1 = Index.fromOneBased(1);
+        Index index2 = Index.fromOneBased(2);
+        DeleteImageCommand deleteImageIndex1 = new DeleteImageCommand(index1);
+        DeleteImageCommand deleteImageIndex1Duplicate = new DeleteImageCommand(index1);
+        DeleteImageCommand deleteImageIndex2 = new DeleteImageCommand(index2);
+
+        // same object -> returns true
+        assertTrue(deleteImageIndex1.equals(deleteImageIndex1));
+
+        // different object same values -> returns true
+        assertTrue(deleteImageIndex1.equals(deleteImageIndex1Duplicate));
+
+        // different argument -> returns false
+        assertFalse(deleteImageIndex1.equals(deleteImageIndex2));
+
+        // different object type -> returns false
+        assertFalse(deleteImageIndex1.equals(index1));
+
+        // null -> returns false
+        assertFalse(deleteImageIndex1.equals(null));
+    }
+
     private DeleteImageCommand prepareCommand(Index index) {
         DeleteImageCommand deleteImageCommand = new DeleteImageCommand(index);
         deleteImageCommand.setData(model, new CommandHistory(), new UndoRedoStack());
@@ -233,7 +247,7 @@ public class HighlightCommandTest {
         String highlightTag = listOfTags.get(0).getTagName();
         HighlightCommand highlightCommand = prepareCommand(highlightTag);
 
-        String expectedMessage = HighlightCommand.MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS + highlightTag;
+        String expectedMessage = String.format(HighlightCommand.MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS, highlightTag);
 
         ModelManager expectedModel = new ModelManager(model.getResidentBook(), new UserPrefs());
         expectedModel.updateHighlightStatus(highlightTag);
@@ -246,7 +260,8 @@ public class HighlightCommandTest {
         String nonExistentTag = getNonExistentTag();
         HighlightCommand highlightCommand = prepareCommand(nonExistentTag);
 
-        assertCommandFailure(highlightCommand, model, HighlightCommand.MESSAGE_TAG_NOT_FOUND + nonExistentTag);
+        String expectedMessage = String.format(HighlightCommand.MESSAGE_TAG_NOT_FOUND, nonExistentTag);
+        assertCommandFailure(highlightCommand, model, expectedMessage);
     }
 
     @Test
@@ -254,7 +269,8 @@ public class HighlightCommandTest {
         String emptyTag = "";
         HighlightCommand highlightCommand = prepareCommand(emptyTag);
 
-        assertCommandFailure(highlightCommand, model, HighlightCommand.MESSAGE_TAG_NOT_FOUND + emptyTag);
+        String expectedMessage = String.format(HighlightCommand.MESSAGE_TAG_NOT_FOUND, emptyTag);
+        assertCommandFailure(highlightCommand, model, expectedMessage);
     }
 
     @Test
@@ -299,22 +315,26 @@ public class HighlightCommandTest {
 
     @Test
     public void equals() {
-        String testTag = "test";
-        String otherTestTag = "other test";
-        HighlightCommand highlightCommandFirst = new HighlightCommand(testTag);
-        HighlightCommand highlightCommandSecond = new HighlightCommand(otherTestTag);
+        String tagRa = "RA";
+        String tagExchange = "Exchange";
+        HighlightCommand highlightCommandRa = new HighlightCommand(tagRa);
+        HighlightCommand highlightCommandRaDuplicate = new HighlightCommand(tagRa);
+        HighlightCommand highlightCommandExchange = new HighlightCommand(tagExchange);
 
         // same object -> returns true
-        assertTrue(highlightCommandFirst.equals(highlightCommandFirst));
+        assertTrue(highlightCommandRa.equals(highlightCommandRa));
+
+        // different object same values -> returns true
+        assertTrue(highlightCommandRa.equals(highlightCommandRaDuplicate));
 
         // different argument -> returns false
-        assertFalse(highlightCommandFirst.equals(highlightCommandSecond));
+        assertFalse(highlightCommandRa.equals(highlightCommandExchange));
 
-        // different values -> returns false
-        assertFalse(highlightCommandFirst.equals(1));
+        // different object type -> returns false
+        assertFalse(highlightCommandRa.equals(tagRa));
 
         // null -> returns false
-        assertFalse(highlightCommandFirst.equals(null));
+        assertFalse(highlightCommandRa.equals(null));
     }
 
     /**
@@ -336,7 +356,7 @@ public class AddImageCommandParserTest {
 
     @Test
     public void parse_allFieldsValid_success() {
-        String validInput = " " + INDEX_FIRST_PERSON.getOneBased() + " " + Picture.PLACEHOLDER_IMAGE;
+        String validInput = " " + INDEX_FIRST_PERSON.getOneBased() + " url/" + Picture.PLACEHOLDER_IMAGE;
         AddImageCommand expectedCommand = new AddImageCommand(INDEX_FIRST_PERSON, Picture.PLACEHOLDER_IMAGE);
 
         assertParseSuccess(parser, validInput, expectedCommand);
@@ -344,15 +364,27 @@ public class AddImageCommandParserTest {
 
     @Test
     public void parse_indexNonInteger_failure() {
-        String invalidIndexArgs = "one " + Picture.PLACEHOLDER_IMAGE;
+        String invalidIndexArgs = "one url/" + Picture.PLACEHOLDER_IMAGE;
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddImageCommand.MESSAGE_USAGE);
+
         assertParseFailure(parser, invalidIndexArgs, expectedMessage);
+    }
+
+    @Test
+    public void execute_invalidImageFormat_failure() throws Exception {
+        String invalidImageFormatUrl = " " + INDEX_FIRST_PERSON.getOneBased() + " url/"
+            + Picture.PLACEHOLDER_IMAGE + "g";
+        String expectedMessage = String.format(MESSAGE_INVALID_IMAGE_FORMAT,
+            AddImageCommand.MESSAGE_VALID_IMAGE_FORMATS);
+
+        assertParseFailure(parser, invalidImageFormatUrl, expectedMessage);
     }
 
     @Test
     public void parse_invalidArgNumber_failure() {
         String invalidArgs = "1";
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddImageCommand.MESSAGE_USAGE);
+
         assertParseFailure(parser, invalidArgs, expectedMessage);
     }
 }
@@ -425,25 +457,4 @@ public class HighlightCommandParserTest {
         assertTrue(modelManager.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased()).equals(editedPerson));
 
     }
-```
-###### \java\seedu\room\model\person\PictureTest.java
-``` java
-public class PictureTest {
-
-    @Test
-    public void isValidUrl() {
-        // Invalid picture urls
-        assertFalse(Picture.isValidImageUrl("")); // empty string
-        assertFalse(Picture.isValidImageUrl(" ")); // spaces only
-        assertFalse(Picture.isValidImageUrl("folder//folder/image.jpg")); // Double slash invalid file url
-
-        // Valid picture numbers
-        assertTrue(Picture.isValidImageUrl("folder1/folder2/image.jpg"));
-        assertTrue(Picture.isValidImageUrl("folder1/folder2/image.png"));
-
-        // Default picture url
-        Picture defaultPicture = new Picture();
-        assertTrue(defaultPicture.getPictureUrl().equals(Picture.PLACEHOLDER_IMAGE));
-    }
-}
 ```
