@@ -1,4 +1,26 @@
 # Haozhe321
+###### \java\seedu\room\commons\events\ui\ChangeMonthRequestEvent.java
+``` java
+
+/**
+ * This event will be raised during the PrevCommand or the NextCommand
+ */
+public class ChangeMonthRequestEvent extends BaseEvent {
+    public final int targetIndex;
+
+    public ChangeMonthRequestEvent(int targetIndex) {
+        this.targetIndex = targetIndex;
+    }
+
+    public int getTargetIndex() {
+        return targetIndex;
+    }
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+}
+```
 ###### \java\seedu\room\logic\commands\AddCommand.java
 ``` java
     @Override
@@ -62,6 +84,53 @@ public class DeleteByTagCommand extends UndoableCommand {
 
 
 ```
+###### \java\seedu\room\logic\commands\NextCommand.java
+``` java
+
+/**
+ * The command to go to the next month in the calendar
+ */
+public class NextCommand extends Command {
+    public static final String COMMAND_WORD = "next";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Go to the next month in the calendar\n"
+            + "Example: " + COMMAND_WORD;
+
+    public static final String MESSAGE_SWITCH_TAB_SUCCESS = "Switched to next month on calendar";
+
+
+    @Override
+    public CommandResult execute() {
+        EventsCenter.getInstance().post(new ChangeMonthRequestEvent(1));
+        return new CommandResult(MESSAGE_SWITCH_TAB_SUCCESS);
+    }
+}
+```
+###### \java\seedu\room\logic\commands\PrevCommand.java
+``` java
+/**
+ * The command to go to the previous month in the calendar
+ */
+public class PrevCommand extends Command {
+    public static final String COMMAND_WORD = "prev";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Go to the previous month in the calendar\n"
+            + "Example: " + COMMAND_WORD;
+
+    public static final String MESSAGE_SWITCH_TAB_SUCCESS = "Switched to previous month on calendar";
+
+
+    @Override
+    public CommandResult execute() {
+        EventsCenter.getInstance().post(new ChangeMonthRequestEvent(0));
+        return new CommandResult(MESSAGE_SWITCH_TAB_SUCCESS);
+    }
+
+
+}
+```
 ###### \java\seedu\room\logic\parser\DeleteByTagCommandParser.java
 ``` java
 /**
@@ -92,6 +161,14 @@ public class DeleteByTagCommandParser implements Parser<DeleteByTagCommand> {
             NumberFormatException {
         return timestamp.isPresent() ? Optional.of(new Timestamp(Long.parseLong(timestamp.get()))) : Optional.empty();
     }
+```
+###### \java\seedu\room\logic\parser\ResidentBookParser.java
+``` java
+        case PrevCommand.COMMAND_WORD:
+            return new PrevCommand();
+
+        case NextCommand.COMMAND_WORD:
+            return new NextCommand();
 ```
 ###### \java\seedu\room\model\Model.java
 ``` java
@@ -140,19 +217,20 @@ public class Timestamp {
     private long daysToLive;
 
     public Timestamp(long day) throws IllegalValueException {
-        creationTime = LocalDateTime.now().withNano(0).withSecond(0).withMinute(0);
+        this.creationTime = LocalDateTime.now().withNano(0).withSecond(0).withMinute(0);
         if (!isValidTimestamp(day)) {
             throw new IllegalValueException(MESSAGE_TIMESTAMP_CONSTRAINTS);
         }
         if (day > 0) {
-            expiryTime = creationTime.plusDays(day).withNano(0).withSecond(0).withMinute(0);
+            this.expiryTime = this.creationTime.plusDays(day).withNano(0).withSecond(0).withMinute(0);
         }
-        daysToLive = day;
+        this.daysToLive = day;
     }
 
+    //overloaded constructor
     public Timestamp(String expiry) {
-        expiryTime = LocalDateTime.parse(expiry);
-        expiryTime = expiryTime.withNano(0).withSecond(0).withMinute(0);
+        this.expiryTime = LocalDateTime.parse(expiry);
+        this.expiryTime = this.expiryTime.withNano(0).withSecond(0).withMinute(0);
     }
 
     public LocalDateTime getCreationTime() {
@@ -176,10 +254,10 @@ public class Timestamp {
      * @return the expiry time of the timestamp in String
      */
     public String toString() {
-        if (expiryTime == null) {
+        if (this.expiryTime == null) {
             return "null";
         } else {
-            return expiryTime.toString();
+            return this.expiryTime.toString();
         }
     }
 
@@ -192,6 +270,34 @@ public class Timestamp {
     }
 
 }
+```
+###### \java\seedu\room\model\person\UniquePersonList.java
+``` java
+    /**
+     * Removes the persons who have the tag supplied
+     *
+     * @throws CommandException if no one has this tag
+     */
+    public void removeByTag(Tag tag) throws CommandException {
+        Iterator<Person> itr = this.iterator();
+        int numRemoved = 0;
+        while (itr.hasNext()) {
+            Person p = itr.next();
+            if (p.getTags().contains(tag)) {
+                itr.remove();
+                numRemoved++;
+            }
+        }
+        if (numRemoved == 0) {
+            throw new CommandException(Messages.MESSAGE_INVALID_TAG_FOUND);
+        }
+    }
+```
+###### \java\seedu\room\model\person\UniquePersonList.java
+``` java
+    public ObservableList<Person> getInternalList() {
+        return internalList;
+    }
 ```
 ###### \java\seedu\room\model\ResidentBook.java
 ``` java
@@ -229,8 +335,7 @@ public class AnchorPaneNode extends AnchorPane {
 
     public final Color yellow = Color.web("#CA9733");
     public final Color green = Color.web("#336D1C");
-    // Date associated with this pane
-    private LocalDate date;
+    private LocalDate date; // Date associated with this pane
     private final Background focusBackground = new Background(new BackgroundFill(
             green, CornerRadii.EMPTY, Insets.EMPTY));
     private final Background todayBackground = new Background(new BackgroundFill(
@@ -245,10 +350,7 @@ public class AnchorPaneNode extends AnchorPane {
      */
     public AnchorPaneNode(Node... children) {
         super(children);
-        // Add action handler for mouse clicked
-        this.setBackgroundUnfocused();
-        this.setStyle("-fx-border-width: 2;");
-        this.setStyle("-fx-border-color: white;");
+        this.setupPane();
 
         this.setOnMouseClicked((e) -> {
             if (this.getBackground() == focusBackground) {
@@ -268,6 +370,14 @@ public class AnchorPaneNode extends AnchorPane {
         this.date = date;
     }
 
+    /**
+     * set up this AnchorPane with predefined style and set the background to be unfocused
+     */
+    public void setupPane() {
+        this.setBackgroundUnfocused();
+        this.setStyle("-fx-border-width: 2;");
+        this.setStyle("-fx-border-color: white;");
+    }
 
     /**
      *Focus on the Grid when the mouse clicks on it
@@ -318,71 +428,35 @@ public class AnchorPaneNode extends AnchorPane {
  */
 public class CalendarBox {
 
-    private ArrayList<AnchorPaneNode> allCalendarDays = new ArrayList<>(35);
+    private ArrayList<AnchorPaneNode> allCalendarDays;
     private VBox view;
     private Text calendarTitle;
+    private GridPane calendar;
+    private GridPane dayLabels;
+    private HBox titleBar;
     private YearMonth currentYearMonth;
     private final Color yellow = Color.web("#CA9733");
     private Logic logic;
+    private HashMap<LocalDate, ArrayList<ReadOnlyEvent>> hashEvents;
+    private Text[] dayNames = new Text[]{ new Text("Sunday"), new Text("Monday"), new Text("Tuesday"),
+        new Text("Wednesday"), new Text("Thursday"), new Text("Friday"),
+        new Text("Saturday") };
 
 
     /**
-     * Create a calendar view
-     * @param yearMonth year month to create the calendar of
+     * Create a month-based calendar filled with dates and events
+     * @param yearMonth the month of the calendar to create the calendar
+     * @param logic containing the events to populate
      */
     public CalendarBox(YearMonth yearMonth, Logic logic) {
         this.logic = logic;
         currentYearMonth = yearMonth;
-        // Create the calendar grid pane
-        GridPane calendar = new GridPane();
-        calendar.setPrefSize(500, 450);
-        calendar.setGridLinesVisible(true);
-        // Create rows and columns with anchor panes for the calendar
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 7; j++) {
-                AnchorPaneNode ap = new AnchorPaneNode();
-                ap.setPrefSize(200, 90);
-                calendar.add(ap, j, i);
-                allCalendarDays.add(ap);
-            }
-        }
-        // Days of the week labels
-        Text[] dayNames = new Text[]{ new Text("Sunday"), new Text("Monday"), new Text("Tuesday"),
-            new Text("Wednesday"), new Text("Thursday"), new Text("Friday"),
-            new Text("Saturday") };
-        GridPane dayLabels = new GridPane();
-        dayLabels.setPrefWidth(600);
-        Integer col = 0;
-        for (Text txt : dayNames) {
-            txt.setFill(Color.WHITE);
-            AnchorPane ap = new AnchorPane();
-            ap.setId("calendarDaysPane");
-            ap.setPrefSize(200, 10);
-            ap.setBottomAnchor(txt, 5.0);
-            ap.getChildren().add(txt);
-            txt.setTextAlignment(TextAlignment.CENTER);
-            ap.setStyle("-fx-text-align: center;");
-            dayLabels.add(ap, col++, 0);
-        }
-        // Create calendarTitle and buttons to change current month
-        calendarTitle = new Text();
-        calendarTitle.setFill(yellow);
-        calendarTitle.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+        allCalendarDays = new ArrayList<>(35);
 
-        Button previousMonth = new Button(" PREV ");
-        previousMonth.setOnAction(e -> previousMonth());
-
-        Button nextMonth = new Button(" NEXT ");
-        nextMonth.setOnAction(e -> nextMonth());
-
-        HBox titleBar = new HBox(previousMonth, calendarTitle, nextMonth);
-        HBox.setMargin(previousMonth, new Insets(0, 13, 0, 13));
-        HBox.setMargin(nextMonth, new Insets(0, 13, 0, 13));
-
-        titleBar.setAlignment(Pos.BASELINE_CENTER);
-        // Populate calendar with the appropriate day numbers
-        logic.getFilteredEventList();
+        makeCalendarSkeleton();
+        makeCalendarNavigationTool();
         populateCalendar(yearMonth, logic.getFilteredEventList());
+
         // Create the calendar view
         view = new VBox(titleBar, dayLabels, calendar);
         VBox.setMargin(titleBar, new Insets(0, 0, 10, 0));
@@ -395,69 +469,142 @@ public class CalendarBox {
      * @param eventList list of events to populate
      */
     public void populateCalendar(YearMonth yearMonth, ObservableList<ReadOnlyEvent> eventList) {
-        HashMap<LocalDate, ArrayList<ReadOnlyEvent>> hashEvents = new HashMap<LocalDate, ArrayList<ReadOnlyEvent>>();
+        hashEvents = new HashMap<LocalDate, ArrayList<ReadOnlyEvent>>();
         hashEvents = eventsHashMap(eventList);
 
-        // Get the date we want to start with on the calendar
-        LocalDate calendarDate = LocalDate.of(yearMonth.getYear(), yearMonth.getMonthValue(), 1);
-        // Dial back the day until it is SUNDAY (unless the month starts on a sunday)
-        while (!calendarDate.getDayOfWeek().toString().equals("SUNDAY")) {
-            calendarDate = calendarDate.minusDays(1);
-        }
+        LocalDate calendarDate = dateForCalendarPage(yearMonth);
+        populateDays(calendarDate);
+        changeCalenderTitle(yearMonth);
+    }
 
-        // Populate the calendar with day numbers
-        for (AnchorPaneNode ap : allCalendarDays) {
-            ap.setId("calendarCell");
-            if (ap.getChildren().size() != 0) {
-                ap.getChildren().remove(0);
-            }
+    //////////////////////////////////// Methods to create the calendar ///////////////////////////////////////////////
 
-            ap.getChildren().clear();
-            //make today's date light up
-            if (calendarDate.equals(LocalDate.now())) {
-                ap.lightUpToday();
-            } else {
-                ap.revertBackground();
-            }
-            addDates(calendarDate, ap);
+    /**
+     * Create the title of the calendar and set style
+     */
+    private void makeCalenderTitle() {
+        this.calendarTitle = new Text();
+        calendarTitle.setFill(yellow);
+        calendarTitle.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
+    }
 
-            if (hashEvents.containsKey(calendarDate)) {
-                ArrayList<ReadOnlyEvent> eventInADay = hashEvents.get(calendarDate);
-
-                int numEvents = 0;
-                String allEventTitle = "";
-                //go through the list of events and add them to the grid
-                for (ReadOnlyEvent actualEvent: eventInADay) {
-
-                    //if number of events is already more than 2, populate only 2 and tell users there are more events
-                    if (numEvents == 2) {
-                        allEventTitle = allEventTitle + "and more...";
-                        break;
-                    }
-                    String eventTitle = actualEvent.getTitle().toString();
-                    if (eventTitle.length() > 8) {
-                        eventTitle = eventTitle.substring(0, 8) + "...";
-                    }
-                    allEventTitle = allEventTitle + eventTitle + "\n";
-                    numEvents++;
-                }
-                Text eventText = new Text(allEventTitle);
-                addEventName(ap, eventText);
-
-            }
-            calendarDate = calendarDate.plusDays(1);
-
-        }
-        // Change the title of the calendar
+    //Change the title of the calendar according to the month of the calendar
+    private void changeCalenderTitle(YearMonth yearMonth) {
         calendarTitle.setText(yearMonth.getMonth().toString() + " " + String.valueOf(yearMonth.getYear()));
+    }
+
+
+    /**
+     * Make the buttons for users to press to go previous month or next month
+     * @param previousMonth Button to go to previous month
+     * @param nextMonth Button to go to next month
+     */
+    private void makeButtons(Button previousMonth, Button nextMonth) {
+        previousMonth.setOnAction(e -> previousMonth());
+        nextMonth.setOnAction(e -> nextMonth());
+
+    }
+
+    /**
+     * Create the title bar for the calendar above the calendar grids
+     * @param titleBar titleBar represented by a HBox
+     * @param previousMonth Button for previous month
+     * @param nextMonth Button for next month
+     */
+    private void makeCalendarTitleBar(HBox titleBar, Button previousMonth, Button nextMonth) {
+        HBox.setMargin(previousMonth, new Insets(0, 13, 0, 13));
+        HBox.setMargin(nextMonth, new Insets(0, 13, 0, 13));
+        titleBar.setAlignment(Pos.BASELINE_CENTER);
+    }
+
+    /**
+     * Create the entire navigation tool for the calender, i.e. title, previous-month button, next-month button
+     */
+    private void makeCalendarNavigationTool() {
+        makeCalenderTitle();
+
+        Button previousMonth = new Button(" PREV ");
+        Button nextMonth = new Button(" NEXT ");
+
+        makeButtons(previousMonth, nextMonth);
+
+        this.titleBar = new HBox(previousMonth, calendarTitle, nextMonth);
+        makeCalendarTitleBar(titleBar, previousMonth, nextMonth);
+    }
+
+    /**
+     * Make the skeleton for the calendar, i.e. grids for one month, and label for days of the week
+     */
+    private void makeCalendarSkeleton() {
+        // Create the calendar grid pane
+        this.calendar = new GridPane();
+        createGrid(calendar);
+
+        // Create the days of the weeks from Sunday to Saturday
+        this.dayLabels = new GridPane();
+        makeDays(dayNames, dayLabels);
+    }
+
+    /**
+     * Make the days in a week on the calendar
+     * @param dayNames a Text array containing all the days in a week
+     * @param gridPane the overall pane for the calendar
+     */
+    private void makeDays(Text[] dayNames, GridPane gridPane) {
+        gridPane.setPrefWidth(600);
+        int col = 0;
+        for (Text txt : dayNames) {
+            txt.setFill(Color.WHITE);
+            AnchorPane ap = new AnchorPane();
+            ap.setId("calendarDaysPane");
+            ap.setPrefSize(200, 10);
+            ap.setBottomAnchor(txt, 5.0);
+            ap.getChildren().add(txt);
+            txt.setTextAlignment(TextAlignment.CENTER);
+            ap.setStyle("-fx-text-align: center;");
+            gridPane.add(ap, col++, 0);
+        }
+    }
+
+    /**
+     * Create 5 by 7 grids inside calendar
+     * @param calendar
+     */
+    private void createGrid(GridPane calendar) {
+
+        calendar.setPrefSize(500, 450);
+        calendar.setGridLinesVisible(true);
+        // Create rows and columns with anchor panes for the calendar
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                AnchorPaneNode ap = new AnchorPaneNode();
+                ap.setPrefSize(200, 90);
+                calendar.add(ap, j, i);
+                allCalendarDays.add(ap);
+            }
+        }
+    }
+
+    ///////////////////////////// Methods related to populating events on the calendar //////////////////////////////
+
+    /**
+     * Add the event's name on the calendar grid
+     * @param ap AnchorPaneNode that we are adding the event to
+     * @param eventText Text for the event(s)
+     */
+    private void addEventName(AnchorPaneNode ap, Text eventText) {
+        ap.setBottomAnchor(eventText, 5.0);
+        ap.setLeftAnchor(eventText, 5.0);
+        ap.getChildren().add(eventText);
     }
 
     /**
      * Create a HashMap of LocalDate and Arraylist of ReadOnlyEvent to use for populating events on calendar
-     * @param eventList
+     * Each key in the HashMap can contain one or more events in the value of the HashMap, stored using an ArrayList
+     * @param eventList list of ReadOnlyEvent
      * @return HashMap of LocalDate and Arraylist of ReadOnlyEvent
      */
-    public HashMap<LocalDate, ArrayList<ReadOnlyEvent>> eventsHashMap(ObservableList<ReadOnlyEvent> eventList) {
+    private HashMap<LocalDate, ArrayList<ReadOnlyEvent>> eventsHashMap(ObservableList<ReadOnlyEvent> eventList) {
         HashMap<LocalDate, ArrayList<ReadOnlyEvent>> hashEvents = new HashMap<LocalDate, ArrayList<ReadOnlyEvent>>();
         for (ReadOnlyEvent event: eventList) {
             if (hashEvents.containsKey(event.getDatetime().getLocalDateTime().toLocalDate())) {
@@ -472,21 +619,52 @@ public class CalendarBox {
         return hashEvents;
     }
 
+
     /**
-     * Add the event's name on the calendar grid
-     * @param ap AnchorPaneNode that we are adding the event to
-     * @param eventText Text for the event(s)
+     * Method to calculate the date of first day in a page of calendar
+     * @param yearMonth the YearMonth for this calendar page
+     * @return the LocalDate for this month/page of the calendar
      */
-    public void addEventName(AnchorPaneNode ap, Text eventText) {
-        ap.setBottomAnchor(eventText, 5.0);
-        ap.setLeftAnchor(eventText, 5.0);
-        ap.getChildren().add(eventText);
+    private LocalDate dateForCalendarPage(YearMonth yearMonth) {
+        // Get the date we want to start with on the calendar
+        LocalDate calendarDate = LocalDate.of(yearMonth.getYear(), yearMonth.getMonthValue(), 1);
+
+        // Dial back the day until it is SUNDAY (unless the month starts on a sunday)
+        while (!calendarDate.getDayOfWeek().toString().equals("SUNDAY")) {
+            calendarDate = calendarDate.minusDays(1);
+        }
+        return calendarDate;
+    }
+
+    /**
+     * Set up the AnchorPaneNode to prepare for date and event population
+     * @param node Individual AnchorPaneNode
+     */
+    private void setupAnchorPaneNode(AnchorPaneNode node) {
+        node.setId("calendarCell");
+        if (node.getChildren().size() != 0) {
+            node.getChildren().remove(0);
+        }
+        node.getChildren().clear();
+    }
+
+    /**
+     * Light up today's grid
+     * @param node Individual AnchorPaneNode
+     * @param calendarDate
+     */
+    private void setupToday(AnchorPaneNode node, LocalDate calendarDate) {
+        if (calendarDate.equals(LocalDate.now())) {
+            node.lightUpToday();
+        } else {
+            node.revertBackground();
+        }
     }
 
     /**
      * add the date number to the grids
      */
-    public void addDates(LocalDate calendarDate, AnchorPaneNode ap) {
+    private void addDates(LocalDate calendarDate, AnchorPaneNode ap) {
         Text txt = new Text(String.valueOf(calendarDate.getDayOfMonth()));
         ap.setDate(calendarDate);
         ap.setTopAnchor(txt, 10.0);
@@ -494,19 +672,69 @@ public class CalendarBox {
         ap.getChildren().add(txt);
     }
 
+    /**
+     * Create a String that represents the events in a day to fit into a grid in the calendar
+     * @param eventInADay ArrayList of events in a day
+     * @return String that represents all events in a day
+     */
+    private String populateDayEvents(ArrayList<ReadOnlyEvent> eventInADay) {
+        int numEvents = 0;
+        String eventTitles = "";
+        for (ReadOnlyEvent actualEvent: eventInADay) {
+
+            //if number of events is already more than 2, populate only 2 and tell users there are more events
+            if (numEvents == 2) {
+                eventTitles = eventTitles + "and more...";
+                break;
+            }
+            String eventTitle = actualEvent.getTitle().toString();
+            if (eventTitle.length() > 8) {
+                eventTitle = eventTitle.substring(0, 8) + "...";
+            }
+            eventTitles = eventTitles + eventTitle + "\n";
+            numEvents++;
+        }
+        return eventTitles;
+    }
+
+    /**
+     * Populate the days and it's corresponding event(if any) in the calendar
+     * @param calendarDate the LocalDate referenced to populate this calendar
+     */
+    private void populateDays(LocalDate calendarDate) {
+        for (AnchorPaneNode ap : allCalendarDays) {
+            setupAnchorPaneNode(ap);
+            setupToday(ap, calendarDate);
+            addDates(calendarDate, ap);
+
+            if (hashEvents.containsKey(calendarDate)) {
+                ArrayList<ReadOnlyEvent> eventInADay = hashEvents.get(calendarDate);
+                Text eventText = new Text(populateDayEvents(eventInADay));
+                addEventName(ap, eventText);
+            }
+            calendarDate = calendarDate.plusDays(1);
+
+        }
+    }
+
+    /////////////////////////////////////// Other methods ////////////////////////////////////////////////
 
     /**
      * Move the month back by one. Repopulate the calendar with the correct dates.
      */
-    private void previousMonth() {
+    public void previousMonth() {
         currentYearMonth = currentYearMonth.minusMonths(1);
+        populateCalendar(currentYearMonth, logic.getFilteredEventList());
+    }
+
+    public void refreshCalendar(Logic logic) {
         populateCalendar(currentYearMonth, logic.getFilteredEventList());
     }
 
     /**
      * Move the month forward by one. Repopulate the calendar with the correct dates.
      */
-    private void nextMonth() {
+    public void nextMonth() {
         currentYearMonth = currentYearMonth.plusMonths(1);
         populateCalendar(currentYearMonth, logic.getFilteredEventList());
     }
@@ -540,18 +768,11 @@ public class CalendarBoxPanel extends UiPart<Region> {
     private Pane calendarPane;
 
     private CalendarBox calendarBox;
-    private Logic logic;
 
     public CalendarBoxPanel(Logic logic) {
         super(FXML);
-        this.logic = logic;
         calendarBox = new CalendarBox(YearMonth.now(), logic);
         calendarPane.getChildren().add(calendarBox.getView());
-    }
-
-    @Subscribe
-    public void handleCalenderBoxPanelChange() {
-        calendarBox.populateCalendar(YearMonth.now(), this.logic.getFilteredEventList());
     }
 
     public CalendarBox getCalendarBox() {
@@ -569,15 +790,37 @@ public class CalendarBoxPanel extends UiPart<Region> {
         calandarBoxPanel = new CalendarBoxPanel(this.logic);
         calendarPlaceholder.getChildren().add(calandarBoxPanel.getRoot());
 ```
+###### \java\seedu\room\ui\MainWindow.java
+``` java
+    @Subscribe
+    public void handleCalenderBoxPanelChange(EventBookChangedEvent event) {
+        switchTab(1);
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        calandarBoxPanel.getCalendarBox().refreshCalendar(this.logic);
+    }
+
+    @Subscribe
+    public void handleChangeMonthCommand(ChangeMonthRequestEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        if (event.getTargetIndex() == 0) {
+            calandarBoxPanel.getCalendarBox().previousMonth();
+        } else if (event.getTargetIndex() == 1) {
+            calandarBoxPanel.getCalendarBox().nextMonth();
+        }
+    }
+
+```
 ###### \java\seedu\room\ui\PersonCard.java
 ``` java
-    //following method gets the color related to a specified tag
+    /**
+     * Get the color related to a specified tag
+     * @param tag the tag that we want to get the colour for
+     * @return color of the tag in String
+     */
     private static String getColorForTag(String tag) {
         if (!tagColor.containsKey(tag)) { //if the hashmap does not have this tag
             String chosenColor = colors.get(random.nextInt(colors.size()));
             tagColor.put(tag, chosenColor); //put the tag and color in
-            /*after this color is chosen, remove from the available list of colors to avoid
-            repeating */
         }
         return tagColor.get(tag);
     }

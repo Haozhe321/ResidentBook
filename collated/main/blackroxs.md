@@ -55,6 +55,7 @@ public class ImportCommand extends UndoableCommand {
             + "Example: " + COMMAND_WORD + " friendsContacts.xml";
 
     public static final String NAME_SEPERATOR = ", ";
+    public static final String NAME_ADDED = " Added: ";
     public static final String MESSAGE_FILE_NOT_UNIQUE = "No unique residents found.";
     private String filePath;
 
@@ -73,7 +74,7 @@ public class ImportCommand extends UndoableCommand {
             addUniquePerson(newList, namesAdded);
             String namesFeedback = getNamesFeedback(namesAdded);
 
-            return new CommandResult(String.format(MESSAGE_SUCCESS + " Added: " + namesFeedback));
+            return new CommandResult(String.format(MESSAGE_SUCCESS + NAME_ADDED + namesFeedback));
         } catch (NullPointerException e) {
             throw new CommandException(MESSAGE_ERROR);
         } catch (DataConversionException e) {
@@ -195,8 +196,8 @@ public class RemoveTagCommand extends UndoableCommand {
 
     /**
      * Creates and returns a {@code Person} with the details of {@code personToEdit}
-     * @param personToEdit
-     * @return
+     * @param personToEdit person with tag
+     * @return person with tag removed
      */
     private Person removedTagFromPerson(ReadOnlyPerson personToEdit) {
         assert personToEdit != null;
@@ -208,7 +209,6 @@ public class RemoveTagCommand extends UndoableCommand {
                 continue;
             } else {
                 updatedTags.add(t);
-                System.out.println(t.tagName);
             }
         }
 
@@ -288,12 +288,12 @@ public class RemoveTagParser implements Parser<RemoveTagCommand> {
 ``` java
     @Override
     public void backupResidentBook(ReadOnlyResidentBook residentBook) throws IOException {
-        saveResidentBook(residentBook, getDirAbsolutePath() + "/backup.xml");
+        saveResidentBook(residentBook, getDirAbsolutePath() + backup_location);
         backupImages();
     }
 
     public Optional<ReadOnlyResidentBook> readBackupResidentBook() throws DataConversionException, IOException {
-        return readResidentBook(getDirAbsolutePath() + "/backup.xml");
+        return readResidentBook(getDirAbsolutePath() + backup_location);
     }
 
     /**
@@ -314,7 +314,7 @@ public class RemoveTagParser implements Parser<RemoveTagCommand> {
      * @throws IOException if unable to read or write in the folder
      */
     public void backupImages() throws IOException {
-        String backupFolder = getDirAbsolutePath() + File.separator + Picture.FOLDER_NAME + "_backup";
+        String backupFolder = getDirAbsolutePath() + File.separator + Picture.FOLDER_NAME + backup;
         String originalFolder = getDirAbsolutePath() + File.separator + Picture.FOLDER_NAME;
 
         handleImageBackupFolder(backupFolder, originalFolder);

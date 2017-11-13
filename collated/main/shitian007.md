@@ -2,14 +2,14 @@
 ###### \java\seedu\room\logic\AutoComplete.java
 ``` java
 /**
- * AutoComplete class integrated into LogicManager to keep track of current set
- * of autocomplete suggestions
+ * AutoComplete class integrated into {@code Logic} to keep track of current set
+ * of autocomplete suggestions according to user input
  */
 public class AutoComplete {
 
-    private final String[] baseCommands = { "add", "addEvent", "addImage", "backup", "edit", "select", "delete",
+    public static final String[] BASE_COMMANDS = { "add", "addEvent", "addImage", "backup", "edit", "select", "delete",
         "deleteByTag", "deleteEvent", "deleteImage", "deleteTag", "clear", "find", "list", "highlight", "history",
-        "import", "exit", "help", "undo", "redo", "sort", "swaproom"
+        "import", "exit", "help", "undo", "redo", "sort", "swaproom", "switch", "prev", "next"
     };
     private ArrayList<String> personsStringArray;
     private String[] autoCompleteList;
@@ -17,14 +17,14 @@ public class AutoComplete {
 
     public AutoComplete(Model model) {
         this.model = model;
-        autoCompleteList = baseCommands;
+        autoCompleteList = BASE_COMMANDS;
         personsStringArray = new ArrayList<String>();
         this.updatePersonsArray();
     }
 
     /**
      * Updates AutoComplete suggestions according to user typed input
-     * @param userInput
+     * @param userInput determines suggestions
      */
     public void updateAutoCompleteList(String userInput) {
         switch (userInput) {
@@ -32,30 +32,33 @@ public class AutoComplete {
             this.resetAutocompleteList();
             break;
         case "find":
-            this.autoCompleteList = getConcatPersonsArray("find");
+            this.autoCompleteList = getConcatResidentsArray("find");
             break;
         case "edit":
-            this.autoCompleteList = getConcatPersonsArray("edit");
+            this.autoCompleteList = getConcatResidentsArray("edit");
             break;
         case "delete":
-            this.autoCompleteList = getConcatPersonsArray("delete");
+            this.autoCompleteList = getConcatResidentsArray("delete");
             break;
         case "select":
-            this.autoCompleteList = getConcatPersonsArray("select");
+            this.autoCompleteList = getConcatResidentsArray("select");
             break;
         case "addImage":
-            this.autoCompleteList = getConcatPersonsArray("addImage");
+            this.autoCompleteList = getConcatResidentsArray("addImage");
             break;
         case "deleteImage":
-            this.autoCompleteList = getConcatPersonsArray("deleteImage");
+            this.autoCompleteList = getConcatResidentsArray("deleteImage");
             break;
         default:
             return;
         }
     }
 
-    // Concatenate Persons to suggestions when command typed
-    private String[] getConcatPersonsArray(String command) {
+    /**
+     * @param command typed in by the user
+     * @return String array of suggestions with the index/name of the list of the displayed residents appended
+     */
+    private String[] getConcatResidentsArray(String command) {
         String[] newAutoCompleteList = new String[personsStringArray.size()];
         for (int i = 0; i < personsStringArray.size(); i++) {
             if (command.equals("find")) {
@@ -68,26 +71,25 @@ public class AutoComplete {
     }
 
     /**
-     * Reset autocomplete suggestions to base commands
+     * Reset {@code autoCompleteList} list to base commands
      */
     public void resetAutocompleteList() {
-        this.autoCompleteList = baseCommands;
+        this.autoCompleteList = BASE_COMMANDS;
     }
 
     /**
-     * Update array of persons suggestions when list modified
+     * Update {@code personStringArray} when list in {@code Model} model modified
      */
     public void updatePersonsArray() {
         personsStringArray.clear();
-        for (ReadOnlyPerson p: model.getFilteredPersonList()) {
-            personsStringArray.add(p.getName().toString());
+        for (ReadOnlyPerson resident: model.getFilteredPersonList()) {
+            personsStringArray.add(resident.getName().toString());
         }
     }
 
     /**
-     * Getter for auto-complete list suggestions
+     * @return Last updated array of suggestions
      */
-    // Update array of persons suggestions when list modified
     public String[] getAutoCompleteList() {
         return autoCompleteList;
     }
@@ -96,29 +98,29 @@ public class AutoComplete {
 ###### \java\seedu\room\logic\commands\AddImageCommand.java
 ``` java
 /**
- * Allows the addition of an image to a resident currently in the resident book
+ * Command handling the addition of an image to a resident currently in the resident book
  */
 public class AddImageCommand extends UndoableCommand {
     public static final String COMMAND_WORD = "addImage";
     public static final String COMMAND_ALIAS = "ai";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an image to the person identified "
-            + "by the index number used in the last person listing. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an image to the resident identified "
+            + "by the index number used in the last resident listing. "
             + "Existing Image will be replaced by the new image.\n"
             + "Parameters: INDEX (must be a positive integer) "
-            + "[ Image Url ]\n"
+            + "url/[ Image Url ]\n"
             + "Example: " + COMMAND_WORD + " 1 "
-            + "/Users/username/Downloads/person-placeholder.jpg";
+            + "url//Users/username/Downloads/person-placeholder.jpg";
+    public static final String MESSAGE_VALID_IMAGE_FORMATS = "Allowed formats: JPG/JPEG/PNG/BMP";
 
-    public static final String MESSAGE_ADD_IMAGE_SUCCESS = "Successfully changed image for Person: %1$s";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the resident book.";
+    public static final String MESSAGE_ADD_IMAGE_SUCCESS = "Successfully changed image for Resident: %1$s";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This resident already exists in the resident book.";
 
     private final Index index;
     private final String newImageUrl;
 
     /**
-     *
-     * @param index of the person in the list whose image is to be updated
+     * @param index of the resident {@code Person} in the current displayed list whose image is to be updated
      * @param newImageUrl url to the new replacing image
      */
     public AddImageCommand(Index index, String newImageUrl) {
@@ -140,16 +142,16 @@ public class AddImageCommand extends UndoableCommand {
             throw new CommandException(Messages.MESSAGE_INVALID_IMAGE_URL);
         }
 
-        ReadOnlyPerson person = lastShownList.get(index.getZeroBased());
-        Person editedPerson = editPersonImage(person);
-        createPersonImage(editedPerson);
+        ReadOnlyPerson resident = lastShownList.get(index.getZeroBased());
+        Person editedPerson = editResidentImage(resident);
+        createResidentImage(editedPerson);
 
         try {
-            model.updatePerson(person, editedPerson);
+            model.updatePerson(resident, editedPerson);
         } catch (DuplicatePersonException dpe) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError("The target person cannot be missing");
+            throw new AssertionError("The target resident cannot be missing");
         }
         model.updateFilteredPersonListPicture(PREDICATE_SHOW_ALL_PERSONS, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
@@ -157,19 +159,20 @@ public class AddImageCommand extends UndoableCommand {
     }
 
     /**
-     * @param person Person to edit
-     * @return Person with updated Picture url
+     * Updates the image url for the specified resident
+     * @param resident to whose {@code Picture} is to be edited
+     * @return {@code Person} with updated {@code Picture}
      */
-    public Person editPersonImage(ReadOnlyPerson person) {
-        Name name = person.getName();
-        Phone phone = person.getPhone();
-        Email email = person.getEmail();
-        Room room = person.getRoom();
-        Timestamp timestamp = person.getTimestamp();
-        Set<Tag> tags = person.getTags();
+    public Person editResidentImage(ReadOnlyPerson resident) {
+        Name name = resident.getName();
+        Phone phone = resident.getPhone();
+        Email email = resident.getEmail();
+        Room room = resident.getRoom();
+        Timestamp timestamp = resident.getTimestamp();
+        Set<Tag> tags = resident.getTags();
 
         Person editedPerson =  new Person(name, phone, email, room, timestamp, tags);
-        if (checkJarResourcePath(person)) {
+        if (checkJarResourcePath(resident)) {
             editedPerson.getPicture().setJarResourcePath();
         }
 
@@ -178,24 +181,24 @@ public class AddImageCommand extends UndoableCommand {
     }
 
     /**
-     * @param person whose image is to be checked
+     * @param resident whose image is to be checked
      * @return true if in production mode (jar file)
      */
-    public boolean checkJarResourcePath(ReadOnlyPerson person) {
-        File picture = new File(person.getPicture().getPictureUrl());
+    public boolean checkJarResourcePath(ReadOnlyPerson resident) {
+        File picture = new File(resident.getPicture().getPictureUrl());
         return (picture.exists()) ? false : true;
     }
 
     /**
-     * @param person whose attributes would be used to generate image file
+     * @param resident whose attributes would be used to generate image file
      */
-    public void createPersonImage(ReadOnlyPerson person) {
+    public void createResidentImage(ReadOnlyPerson resident) {
         File picFile = new File(newImageUrl);
         try {
-            if (person.getPicture().checkJarResourcePath()) {
-                ImageIO.write(ImageIO.read(picFile), "jpg", new File(person.getPicture().getJarPictureUrl()));
+            if (resident.getPicture().checkJarResourcePath()) {
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getJarPictureUrl()));
             } else {
-                ImageIO.write(ImageIO.read(picFile), "jpg", new File(person.getPicture().getPictureUrl()));
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getPictureUrl()));
             }
         } catch (Exception e) {
             System.out.println("Cannot create Person Image");
@@ -206,13 +209,11 @@ public class AddImageCommand extends UndoableCommand {
     public boolean equals(Object other) {
         // short circuit if same object
         if (other == this) {
-            System.out.println("this");
             return true;
         }
 
         // instanceof handles nulls
         if (!(other instanceof AddImageCommand)) {
-            System.out.println("that");
             return false;
         }
 
@@ -226,25 +227,25 @@ public class AddImageCommand extends UndoableCommand {
 ###### \java\seedu\room\logic\commands\DeleteImageCommand.java
 ``` java
 /**
- * Allows deletion of an image for a specified person
+ * Allows deletion of an image for a specified resident
  */
 public class DeleteImageCommand extends UndoableCommand {
     public static final String COMMAND_WORD = "deleteImage";
     public static final String COMMAND_ALIAS = "di";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an image to the person identified "
-            + "by the index number used in the last person listing. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an image to the resident identified "
+            + "by the index number used in the last resident listing. "
             + "Existing Image will be reset to placeholder image.\n"
             + "Parameters: INDEX (must be a positive integer) "
             + "Example: " + COMMAND_WORD + " 3 ";
 
-    public static final String MESSAGE_RESET_IMAGE_SUCCESS = "Successfully reset image for Person: %1$s";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the resident book.";
+    public static final String MESSAGE_RESET_IMAGE_SUCCESS = "Successfully deleted image for Resident: %1$s";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This resident already exists in the resident book.";
 
     private final Index index;
 
     /**
-     * @param index of the person in the list whose image is to be deleted
+     * @param index of the resident {@code Person} in the list whose image is to be deleted
      */
     public DeleteImageCommand(Index index) {
         requireNonNull(index);
@@ -259,48 +260,46 @@ public class DeleteImageCommand extends UndoableCommand {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
-        ReadOnlyPerson person = lastShownList.get(index.getZeroBased());
-        Person editedPerson = resetPersonImage(person);
+        ReadOnlyPerson resident = lastShownList.get(index.getZeroBased());
+        Person editedResident = resetPersonImage(resident);
 
         try {
-            model.updatePerson(person, editedPerson);
+            model.updatePerson(resident, editedResident);
         } catch (DuplicatePersonException dpe) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError("The target person cannot be missing");
+            throw new AssertionError("The target resident cannot be missing");
         }
-        model.updateFilteredPersonListPicture(PREDICATE_SHOW_ALL_PERSONS, editedPerson);
+        model.updateFilteredPersonListPicture(PREDICATE_SHOW_ALL_PERSONS, editedResident);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_RESET_IMAGE_SUCCESS, editedPerson.getName()));
+        return new CommandResult(String.format(MESSAGE_RESET_IMAGE_SUCCESS, editedResident.getName()));
     }
 
     /**
-     * @param person whose image is to be reset
-     * @return Person object with picture url reset
+     * @param resident whose image url within {@code Picture} is to be reset
+     * @return {@code Person} with {@code Picture} reset
      */
-    public Person resetPersonImage(ReadOnlyPerson person) {
-        Name name = person.getName();
-        Phone phone = person.getPhone();
-        Email email = person.getEmail();
-        Room room = person.getRoom();
-        Timestamp timestamp = person.getTimestamp();
-        Set<Tag> tags = person.getTags();
+    public Person resetPersonImage(ReadOnlyPerson resident) {
+        Name name = resident.getName();
+        Phone phone = resident.getPhone();
+        Email email = resident.getEmail();
+        Room room = resident.getRoom();
+        Timestamp timestamp = resident.getTimestamp();
+        Set<Tag> tags = resident.getTags();
 
-        Person editedPerson =  new Person(name, phone, email, room, timestamp, tags);
-        return editedPerson;
+        Person editedResident =  new Person(name, phone, email, room, timestamp, tags);
+        return editedResident;
     }
 
     @Override
     public boolean equals(Object other) {
         // short circuit if same object
         if (other == this) {
-            System.out.println("this");
             return true;
         }
 
         // instanceof handles nulls
         if (!(other instanceof DeleteImageCommand)) {
-            System.out.println("that");
             return false;
         }
 
@@ -325,16 +324,17 @@ public class HighlightCommand extends UndoableCommand {
             + "Example: " + COMMAND_WORD + " "
             + "friends";
 
-    public static final String MESSAGE_RESET_HIGHLIGHT = "Removed all highlighted Residents.";
+    public static final String MESSAGE_RESET_HIGHLIGHT = "Removed all highlights on Residents.";
     public static final String MESSAGE_NONE_HIGHLIGHTED = "No Highlighted Residents.";
 
-    public static final String MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS = "Highlighted persons with tag: ";
-    public static final String MESSAGE_TAG_NOT_FOUND = "Tag not found: ";
+    public static final String MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS = "Highlighted residents with tag: %1$s";
+    public static final String MESSAGE_TAG_NOT_FOUND = "Tag not found: %1$s";
 
     private final String highlightTag;
 
     /**
-     * Creates an HighlightCommand to add the specified {@code ReadOnlyPerson}
+     * Creates a HighlightCommand to highlight the specified list of residents {@code Person}
+     * @param highlightTag specified to determine which residents are highlighted
      */
     public HighlightCommand(String highlightTag) {
         this.highlightTag = highlightTag;
@@ -353,9 +353,9 @@ public class HighlightCommand extends UndoableCommand {
         } else {
             try {
                 model.updateHighlightStatus(highlightTag);
-                return new CommandResult(MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS + highlightTag);
+                return new CommandResult(String.format(MESSAGE_PERSONS_HIGHLIGHTED_SUCCESS, highlightTag));
             } catch (TagNotFoundException e) {
-                throw new CommandException(MESSAGE_TAG_NOT_FOUND + highlightTag);
+                throw new CommandException(String.format(MESSAGE_TAG_NOT_FOUND, highlightTag));
             }
         }
     }
@@ -381,12 +381,20 @@ public class HighlightCommand extends UndoableCommand {
 ###### \java\seedu\room\logic\Logic.java
 ``` java
     /**
-     * Updates Picture of person list within model
+     * Updates Picture of resident {@code Person} within model
+     * @param resident whose picture is to be updated
      */
-    void updatePersonListPicture(Person p);
+    void updatePersonListPicture(Person resident);
 
-    /** Updates and gets list of Auto-complete Strings */
+    /**
+     * Updates autocomplete list within {@code Logic}
+     * @param userInput
+     */
     void updateAutoCompleteList(String userInput);
+
+    /**
+     * @return the latest array of suggestions from {@code Logic}
+     */
     String[] getAutoCompleteList();
 ```
 ###### \java\seedu\room\logic\LogicManager.java
@@ -411,7 +419,8 @@ public class HighlightCommand extends UndoableCommand {
 /**
  * Parses the given {@code String} of arguments in the context of the AddImageCommand
  * and returns an AddImageCommand object for execution.
- * @throws ParseException if the user input does not conform the expected format
+ * @throws InvalidImageFormatException if user input url does not specify a valid image format
+ * @throws ParseException if the user input does not conform to the expected command format
  */
 public class AddImageCommandParser implements Parser<AddImageCommand> {
     @Override
@@ -420,15 +429,32 @@ public class AddImageCommandParser implements Parser<AddImageCommand> {
 
         Index index;
         String url;
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_IMAGE_URL);
+
         try {
-            String[] individualArgs = args.split(" ", 3);
-            index = ParserUtil.parseIndex(individualArgs[1]);
-            url = individualArgs[2];
+            index = ParserUtil.parseIndex(argMultimap.getPreamble());
+            url = validImageFormat(argMultimap.getValue(PREFIX_IMAGE_URL).get());
+        } catch (InvalidImageFormatException e) {
+            throw new ParseException(String.format(MESSAGE_INVALID_IMAGE_FORMAT,
+                AddImageCommand.MESSAGE_VALID_IMAGE_FORMATS));
         } catch (Exception e) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddImageCommand.MESSAGE_USAGE));
         }
-
         return new AddImageCommand(index, url);
+    }
+
+    /**
+     * @param imageUrl actual image url
+     * @return image url if it is of the valid format
+     * @throws InvalidImageFormatException if image format is invalid
+     */
+    public String validImageFormat(String imageUrl) throws InvalidImageFormatException {
+        String validFormatRegex = "(.+(\\.(?i)(jpg|jpeg|png|bmp))$)";
+        if (imageUrl.matches(validFormatRegex)) {
+            return imageUrl;
+        } else {
+            throw new InvalidImageFormatException(MESSAGE_INVALID_COMMAND_FORMAT);
+        }
     }
 }
 ```
@@ -581,14 +607,12 @@ public class TagNotFoundException extends IllegalArgumentException {
 ###### \java\seedu\room\model\person\Picture.java
 ``` java
 /**
- * Represents the url of the picture of the person in the resident book.
+ * Represents the picture object of the resident {@code Person} in the resident book.
  */
 public class Picture {
 
     public static final int PIC_WIDTH = 100;
     public static final int PIC_HEIGHT = 100;
-
-    public static final String IMAGE_URL_VALIDATION_REGEX = "[^ ]+";
 
     public static final String FOLDER_NAME = "contact_images";
 
@@ -598,7 +622,7 @@ public class Picture {
     public static final String PLACEHOLDER_IMAGE = System.getProperty("user.dir")
             + "/src/main/resources/images/placeholder_person.png";
 
-    public static final String BASE_JAR_URL = System.getProperty("user.dir") + "/";
+    public static final String BASE_JAR_URL = System.getProperty("user.dir") + "/data/contact_images/";
 
     public static final String PLACEHOLDER_JAR_URL = "/images/placeholder_person.png";
 
@@ -613,21 +637,21 @@ public class Picture {
     }
 
     /**
-     * @return pictureUrl
+     * @return image resource {@code pictureUrl} for development
      */
     public String getPictureUrl() {
         return pictureUrl;
     }
 
     /**
-     * Handles resource path for jar
+     * @return image resource {@code jarPictureUrl} for production (jar)
      */
     public String getJarPictureUrl() {
         return jarPictureUrl;
     }
 
     /**
-     * Sets jar resource path to true
+     * Sets jar {@code jarResourcePath} path to true
      */
     public void setJarResourcePath() {
         this.jarResourcePath = true;
@@ -642,6 +666,7 @@ public class Picture {
 
     /**
      * Sets name of image which will be appended to contact_images directory
+     * @param pictureUrl set as resource path for both dev and production
      */
     public void setPictureUrl(String pictureUrl) {
         if (pictureUrl.contains("/")) {
@@ -656,18 +681,11 @@ public class Picture {
     }
 
     /**
-     * Resets picture of person to original placeholder
+     * Resets {@code pictureUrl} and {@code jarPictureUrl} of {@code Person} to original placeholder url
      */
     public void resetPictureUrl() {
         this.pictureUrl = PLACEHOLDER_IMAGE;
         this.jarPictureUrl = PLACEHOLDER_JAR_URL;
-    }
-
-    /**
-     * Checks validity of picture url
-     */
-    public static boolean isValidImageUrl(String imageUrl) {
-        return imageUrl.matches(IMAGE_URL_VALIDATION_REGEX) && !imageUrl.contains("//");
     }
 
 }
@@ -762,7 +780,7 @@ public class Picture {
 ###### \java\seedu\room\ui\CommandBox.java
 ``` java
     /**
-     * Initializes suggestions and binds it to TextFields
+     * Initializes suggestions and binds it to {@code commandTextField}
      */
     public void initAutoComplete() {
         suggestions = SuggestionProvider.create((Arrays.asList(logic.getAutoCompleteList())));
@@ -770,7 +788,7 @@ public class Picture {
     }
 
     /**
-     * Updates AutoCompleteList according to current TextField input
+     * Updates AutoCompleteList according to current {@code commandTextField} input
      */
     public void updateAutoCompleteList() {
         logic.updateAutoCompleteList(commandTextField.getText());
@@ -786,7 +804,7 @@ public class Picture {
 ###### \java\seedu\room\ui\PersonPanel.java
 ``` java
 /**
- * The person information panel of the app.
+ * An UI Component that displays additional information for a selected {@code Person}
  */
 public class PersonPanel extends UiPart<Region> {
 
@@ -795,7 +813,7 @@ public class PersonPanel extends UiPart<Region> {
     private final Logger logger = LogsCenter.getLogger(this.getClass());
     private final Logic logic;
 
-    private ReadOnlyPerson person;
+    private ReadOnlyPerson resident;
 
     @FXML
     private ImageView picture;
@@ -837,21 +855,23 @@ public class PersonPanel extends UiPart<Region> {
     }
 
     /**
-     * loads the selected person's information to be displayed.
+     * Loads the properties of the selected {@code Person}
+     * This method is called whenever an update is made to the selected resident or a new resident is selected
+     * @param resident whose properties are updated in the Person Panel UI
      */
-    private void loadPersonInformation(ReadOnlyPerson person) {
-        this.person = updatePersonFromLogic(person);
-        name.textProperty().setValue(person.getName().toString());
-        phone.textProperty().setValue(person.getPhone().toString());
-        address.textProperty().setValue(person.getRoom().toString());
-        email.textProperty().setValue(person.getEmail().toString());
+    private void loadPersonInformation(ReadOnlyPerson resident) {
+        this.resident = updatePersonFromLogic(resident);
+        name.textProperty().setValue(resident.getName().toString());
+        phone.textProperty().setValue(resident.getPhone().toString());
+        address.textProperty().setValue(resident.getRoom().toString());
+        email.textProperty().setValue(resident.getEmail().toString());
         initTags();
         initImage();
         enableButtons(true);
     }
 
     /**
-     * @param state Set button status
+     * @param state of button set
      */
     private void enableButtons(boolean state) {
         this.addImageButton.setDisable(!state);
@@ -859,14 +879,14 @@ public class PersonPanel extends UiPart<Region> {
     }
 
     /**
-     * @param person whose image is to be updated within the filtered persons list
-     * @return the updated person
+     * @param resident whose image is to be updated within the filtered persons list
+     * @return a {@code Person} that is the updated resident
      */
-    private ReadOnlyPerson updatePersonFromLogic(ReadOnlyPerson person) {
+    private ReadOnlyPerson updatePersonFromLogic(ReadOnlyPerson resident) {
         List<ReadOnlyPerson> personList = logic.getFilteredPersonList();
         for (ReadOnlyPerson p : personList) {
-            if (p.getName().toString().equals(person.getName().toString())
-                    && p.getPhone().toString().equals(person.getPhone().toString())) {
+            if (p.getName().toString().equals(resident.getName().toString())
+                    && p.getPhone().toString().equals(resident.getPhone().toString())) {
                 return p;
             }
         }
@@ -874,11 +894,11 @@ public class PersonPanel extends UiPart<Region> {
     }
 
     /**
-     * Sets a background color for each tag.
+     * Sets a background color for each tag of the selected {@code Person}
      */
     private void initTags() {
         tags.getChildren().clear();
-        person.getTags().forEach(tag -> {
+        resident.getTags().forEach(tag -> {
             Label tagLabel = new Label(tag.tagName);
             tagLabel.setStyle("-fx-background-color: " + tag.getTagColor());
             tags.getChildren().add(tagLabel);
@@ -886,49 +906,24 @@ public class PersonPanel extends UiPart<Region> {
     }
 
     /**
-     * Initializes image for every person in person card
+     * Initializes image for the selected resident {@code Person}
      */
     private void initImage() {
         try {
-            File picFile = new File(person.getPicture().getPictureUrl());
-            if (picFile.exists()) {
-                FileInputStream fileStream = new FileInputStream(picFile);
-                Image personPicture = new Image(fileStream);
-                picture.setImage(personPicture);
-            } else {
+            initProjectImage();
+        } catch (Exception pfnfe) {
+            try {
                 initJarImage();
+            } catch (Exception jfnfe) {
+                ;
             }
-            picture.setFitHeight(person.getPicture().PIC_HEIGHT);
-            picture.setFitWidth(person.getPicture().PIC_WIDTH);
-            informationPane.getChildren().add(picture);
-            picture.setOnMouseClicked((MouseEvent e) -> {
-                handleAddImage();
-            });
-        } catch (Exception e) {
-            System.out.println("Image not found");
         }
+        picture.setFitHeight(resident.getPicture().PIC_HEIGHT);
+        picture.setFitWidth(resident.getPicture().PIC_WIDTH);
     }
 
     /**
-     * Handle loading of image from both within and outside of jar file
-     */
-    public void initJarImage() throws FileNotFoundException {
-        try {
-            InputStream in = this.getClass().getResourceAsStream(person.getPicture().getJarPictureUrl());
-            Image personPicture = new Image(in);
-            picture.setImage(personPicture);
-            person.getPicture().setJarResourcePath();
-        } catch (Exception e) {
-            File picFile = new File(person.getPicture().getJarPictureUrl());
-            FileInputStream fileStream = new FileInputStream(picFile);
-            Image personPicture = new Image(fileStream);
-            picture.setImage(personPicture);
-            person.getPicture().setJarResourcePath();
-        }
-    }
-
-    /**
-     * Button handler for adding image to person
+     * GUI Button handler for adding image to resident
      */
     @FXML
     private void handleAddImage() {
@@ -936,50 +931,68 @@ public class PersonPanel extends UiPart<Region> {
         File selectedPic = picChooser.showOpenDialog(null);
         if (selectedPic != null) {
             try {
-                person.getPicture().setPictureUrl(person.getName().toString() + person.getPhone().toString() + ".jpg");
-                logic.updatePersonListPicture((Person) person);
-                if (person.getPicture().checkJarResourcePath()) {
-                    ImageIO.write(ImageIO.read(selectedPic), "jpg", new File(person.getPicture().getJarPictureUrl()));
-                    FileInputStream fileStream = new FileInputStream(person.getPicture().getJarPictureUrl());
-                    Image newPicture = new Image(fileStream);
-                    picture.setImage(newPicture);
+                resident.getPicture().setPictureUrl(resident.getName().toString()
+                    + resident.getPhone().toString() + ".jpg");
+                logic.updatePersonListPicture((Person) resident);
+                FileInputStream fileStream;
+                if (resident.getPicture().checkJarResourcePath()) {
+                    ImageIO.write(ImageIO.read(selectedPic), "jpg",
+                        new File(resident.getPicture().getJarPictureUrl()));
+                    fileStream = new FileInputStream(resident.getPicture().getJarPictureUrl());
                 } else {
-                    ImageIO.write(ImageIO.read(selectedPic), "jpg", new File(person.getPicture().getPictureUrl()));
-                    FileInputStream fileStream = new FileInputStream(person.getPicture().getPictureUrl());
-                    Image newPicture = new Image(fileStream);
-                    picture.setImage(newPicture);
+                    ImageIO.write(ImageIO.read(selectedPic), "jpg",
+                        new File(resident.getPicture().getPictureUrl()));
+                    fileStream = new FileInputStream(resident.getPicture().getPictureUrl());
                 }
+                Image newPicture = new Image(fileStream);
+                picture.setImage(newPicture);
             } catch (Exception e) {
-                System.out.println(e + "Cannot set Image of person");
+                System.out.println(e + "Cannot set Image of resident");
             }
-        } else {
-            System.out.println("Please select an Image File");
         }
     }
 
     /**
-     * Button handler for resetting a person's image
+     * GUI Button handler for resetting a resident's image
      */
     @FXML
     private void handleResetImage() {
         try {
-            person.getPicture().resetPictureUrl();
-            if (person.getPicture().checkJarResourcePath()) {
-                InputStream in = this.getClass().getResourceAsStream(person.getPicture().getJarPictureUrl());
-                person.getPicture().setJarResourcePath();
-                Image personPicture = new Image(in);
-                picture.setImage(personPicture);
+            resident.getPicture().resetPictureUrl();
+            if (resident.getPicture().checkJarResourcePath()) {
+                initJarImage();
             } else {
-                person.getPicture().resetPictureUrl();
-                File picFile = new File(person.getPicture().getPictureUrl());
-                FileInputStream fileStream = new FileInputStream(picFile);
-                Image personPicture = new Image(fileStream);
-                picture.setImage(personPicture);
+                initProjectImage();
             }
         } catch (Exception e) {
             System.out.println("Placeholder Image not found");
         }
     }
+
+    /**
+     * Handle loading of image during development
+     * @throws FileNotFoundException when image url is invalid
+     */
+    public void initProjectImage() throws FileNotFoundException {
+        File picFile = new File(resident.getPicture().getPictureUrl());
+        FileInputStream fileStream = new FileInputStream(picFile);
+        Image personPicture = new Image(fileStream);
+        picture.setImage(personPicture);
+        informationPane.getChildren().add(picture);
+    }
+
+    /**
+     * Handle loading of image in production (i.e. from jar file)
+     * @throws FileNotFoundException when image url is invalid
+     */
+    public void initJarImage() throws FileNotFoundException {
+        InputStream in = this.getClass().getResourceAsStream(resident.getPicture().getJarPictureUrl());
+        Image personPicture = new Image(in);
+        picture.setImage(personPicture);
+        resident.getPicture().setJarResourcePath();
+        informationPane.getChildren().add(picture);
+    }
+
 
     @Subscribe
     private void handlePersonPanelSelectionChangedEvent(PersonPanelSelectionChangedEvent event) {
@@ -1001,6 +1014,19 @@ public class PersonPanel extends UiPart<Region> {
 
         return false;
     }
+}
+```
+###### \resources\view\DarkTheme.css
+``` css
+.auto-complete-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-font-size: 11pt;
+}
+
+.auto-complete-popup .clipped-container {
+    -fx-font-family: "Verdana";
+    -fx-background-color: grey;
+    -fx-background-radius: 2px;
 }
 ```
 ###### \resources\view\PersonPanel.fxml
