@@ -543,12 +543,12 @@ The actual update of the image is implemented by reloading the `Person` passed t
 
 **Alternatives Considered:**
 
-**Alternative 1: Omit creation of resident's image**
-**Pros:** Addition of images directly from the user specified path and not saving their duplicates was considered due to it's simplicity as well as having the added benefit of not saving a duplicate of the picture.
+**Alternative 1: Omit creation of resident's image** +
+**Pros:** Addition of images directly from the user specified path and not saving their duplicates was considered due to it's simplicity as well as having the added benefit of not saving a duplicate of the picture. +
 **Cons:** This would also mean that it would be impossible for the application to be portable since the images could not be possibly be bundled together when the user wants to migrate the application to another platform.
 
-**Alternative 2: Implementing Add/Delete Image as UNDOABLE commands**
-**Pros:** Implementing image commands as UNDOABLE commands would grant the user the convenience of adding back an image they accidentally deleted.
+**Alternative 2: Implementing Add/Delete Image as UNDOABLE commands** +
+**Pros:** Implementing image commands as UNDOABLE commands would grant the user the convenience of adding back an image they accidentally deleted. +
 **Cons:** The implementation of such a feature would be very complex (especially when 'alternative 1', omitting the resident's image is not an option). Furthermore, this would mean saving multiple images of the same person to allow for addition/deletion, which would be a huge burden on the space required to run the application.
 
 // end::picture[]
@@ -620,6 +620,12 @@ The `smart` feature of the autocomplete feature in that it will display person n
             ...
 ----
 
+==== Design Considerations
+
+**Alternatives Considered:**
+
+**Pros:** Much easier to implement and 
+**Cons:** This would also mean that it would be impossible for the application to be portable since the images could not be possibly be bundled together when the user wants to migrate the application to another platform.
 
 // end::autocomplete[]
 
@@ -649,9 +655,9 @@ Illegal arguments will raise a CommandException which will be displayed to the u
 // tag::highlight[]
 === Highlight Command
 
-The highlight command is implemented to highlight the contacts with the specified tag
+The highlight command is implemented to highlight the contacts with the tag specified.
 
-If the tag specified does not exist, trying to highlight the persons with the tag will raise an exception:
+If the tag specified does not exist, trying to highlight the persons with the tag will raise the TagNotFoundException:
 [source,java]
 ----
 public void updateHighlight(String highlightTag) {
@@ -666,7 +672,7 @@ public void updateHighlight(String highlightTag) {
 }
 ----
 
-This exception is later caught higher up the execution stack and the user receives a message that the tag does not exist.
+This exception is caught higher up the execution stack and the user receives a message that the tag does not exist.
 
 To highlight the persons with the specified tags, the list of persons is indicated to be updated every time the command is run.
 This change is reflected in the UI with the refreshing of the persons list.
@@ -681,13 +687,12 @@ private void initHighlightStatus() {
 }
 ----
 
-The highlight command also allows removal of highlighting through input of "-" as tag name.
+The highlight command also allows removal of highlighting through input of `-` as tag name.
+[TIP]
+This is possible since `-` is an invalid tag name and would not be a valid tag to be highlighted.
 
 [source, java]
 ----
-    /**
-     * Removes highlighting of everyone
-     */
     public void resetHighlightStatus() throws NoneHighlightedException {
         boolean highlightReset = resetHighlightStatusHelper();
         if (!highlightReset) {
@@ -695,6 +700,22 @@ The highlight command also allows removal of highlighting through input of "-" a
         }
     }
 ----
+
+The following sequence diagram illustrates execution of the highlight command:
+
+image::deleteImageActivityDiagram.png[width="500"]
+
+==== Design Considerations
+
+**Alternatives Considered:**
+
+**Alternative 1:** Allow user to remove tag highlight with additional command or by specifying an invalid tag +
+**Pros:** +
+* Reduce possible confusion and the need to memorize `-` as a deletion command.
+* Easier implementation.
+**Cons:** +
+* User may accidentally unselect highlighted personnel upon wrong input.
+
 // end::highlight[]
 
 // tag::temporaryperson[]
