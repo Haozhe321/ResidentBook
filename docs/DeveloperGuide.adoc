@@ -367,13 +367,57 @@ Certain properties of the application can be controlled (e.g App name, logging l
 // tag::picture[]
 === Add Picture
 
-The add picture mechanism allows the adding of a picture to every individual person. +
-Images are saved in he format `<name><contact>` to differentiate between persons with the same name +
-It is implemented as both a CLI as well as a GUI feature.
+The add/delete picture mechanism allows the adding of an image to every individual resident. +
+Images are saved in the format `[NAME][CONTACT].jpg` to differentiate between persons with the same name +
 
-The GUI version includes two buttons available to the user in the PersonPanel.
+The mechanism is as two different versions:
+* GUI Version
+* CLI Version
 
-This is implemented in the PersonPanel directly using the Button object.
+==== Picture
+
+A Picture class is implemented to record the image url of every resident.
+
+Considering the drastically different accessible file paths between development and production mode, every Picture includes a jar URL for production mode.
+Both of these URLs are updated when a new image is added.
+
+[source,java]
+----
+    public Picture() {
+        this.pictureUrl = PLACEHOLDER_IMAGE;
+        this.jarPictureUrl = PLACEHOLDER_JAR_URL;
+        this.jarResourcePath = false;
+    }
+----
+
+Every resident is given a default placeholder image URL on instantiation which points to the placeholder_person present in resources
+
+[source,java]
+----
+    public static final String PLACEHOLDER_IMAGE = System.getProperty("user.dir")
+            + "/src/main/resources/images/placeholder_person.png";
+
+    public static final String PLACEHOLDER_JAR_URL = "/images/placeholder_person.png";
+----
+
+==== Add/Delete Picture (GUI Version)
+
+The GUI version includes two buttons available to the user in the PersonPanel when a person is selected.
+
+Since it does not make sense for an image to be added when no Resident is selected, the GUI buttons are automatically disabled when no resident is selected, utilizing the enableButtons method as illustrated below
+
+[source,java]
+----
+    private void enableButtons(boolean state) {
+        this.addImageButton.setDisable(!state);
+        this.resetImageButton.setDisable(!state);
+    }
+----
+
+The add/delete image buttons is implemented in the PersonPanel with a handler for each button.
+
+[TIP]
+Since the file paths for `Production` and `Development` environments are different as mentioned, it is imperative that we verify for resource paths.
 
 [source,java]
 ----
@@ -395,9 +439,90 @@ This is implemented in the PersonPanel directly using the Button object.
                 ...
 ----
 
-The CLI version allows the user to specify the index of the person and directly update the image url.
+==== Add Image (CLI Version)
 
-This is implemented by updating the image field whenever the residentBook is updated.
+The CLI version allows the user to specify the index of the resident and directly update the image url from the command box.
+
+Validity of the given format is check initially, throwing an InvalidImageFormatException if file type is not one of `jpg/jpeg/png/bmp`.
+Subsequently, the validity of the index and the given image URL is checked.
+
+[source,java]
+----
+    public String validImageFormat(String imageUrl) throws InvalidImageFormatException {
+        String validFormatRegex = "(.+(\\.(?i)(jpg|jpeg|png|bmp))$)";
+        if (imageUrl.matches(validFormatRegex)) {
+            return imageUrl;
+        } else {
+            throw new InvalidImageFormatException(MESSAGE_INVALID_COMMAND_FORMAT);
+        }
+    }
+
+    public CommandResult executeUndoableCommand() throws CommandException {
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        if (!(new File(newImageUrl).exists())) {
+            throw new CommandException(Messages.MESSAGE_INVALID_IMAGE_URL);
+        }
+        ...
+----
+
+The image is then saved according to whether the app is run in production or development, through checking the validity of the jar resource path
+
+[source,java]
+----
+    public void createResidentImage(ReadOnlyPerson resident) {
+        File picFile = new File(newImageUrl);
+        try {
+            if (resident.getPicture().checkJarResourcePath()) {
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getJarPictureUrl()));
+            } else {
+                ImageIO.write(ImageIO.read(picFile), "jpg", new File(resident.getPicture().getPictureUrl()));
+            }
+        } catch (Exception e) {
+            System.out.println("Cannot create Person Image");
+        }
+    }
+----
+
+The activity diagram below summarizes the sequence of execution:
+
+image::addImageActivityDiagram.png[width="500"]
+
+==== Delete Image (CLI Version)
+
+The CLI Delete Image allows the user to specify the index of the resident and directly update the image url from the command box, as long as the index passed is valid
+
+[source,java]
+----
+    public CommandResult executeUndoableCommand() throws CommandException {
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+        ...
+----
+
+The deletion of the image occurs as a resetting of the image url within the Picture of the resident
+
+[source,java]
+----
+    public Person resetPersonImage(ReadOnlyPerson resident) {
+        ...
+        Person editedResident =  new Person(name, phone, email, room, timestamp, tags);
+        return editedResident;
+    }
+----
+
+The activity diagram below summarizes the sequence of execution:
+
+image::deleteImageActivityDiagram.png[width="500"]
+
+The actual update of the image is implemented by reloading the `Person` passed to the PersonPanel whenever the residentBook is updated.
 
 [source,java]
 ----
@@ -407,30 +532,61 @@ This is implemented by updating the image field whenever the residentBook is upd
         loadPersonInformation(event.getNewSelection().person);
     }
 
-    /**
-     * loads the selected person's information to be displayed.
-     */
     private void loadPersonInformation(ReadOnlyPerson person) {
         this.person = updatePersonFromLogic(person);
         name.textProperty().setValue(person.getName().toString());
         phone.textProperty().setValue(person.getPhone().toString());
         ...
 ----
+
+==== Design Considerations
+
+**Alternatives Considered:**
+
+**Alternative 1: Omit creation of resident's image** +
+**Pros:** Addition of images directly from the user specified path and not saving their duplicates was considered due to it's simplicity as well as having the added benefit of not saving a duplicate of the picture. +
+**Cons:** This would also mean that it would be impossible for the application to be portable since the images could not be possibly be bundled together when the user wants to migrate the application to another platform.
+
+**Alternative 2: Implementing Add/Delete Image as UNDOABLE commands** +
+**Pros:** Implementing image commands as UNDOABLE commands would grant the user the convenience of adding back an image they accidentally deleted. +
+**Cons:** The implementation of such a feature would be very complex (especially when 'alternative 1', omitting the resident's image is not an option). Furthermore, this would mean saving multiple images of the same person to allow for addition/deletion, which would be a huge burden on the space required to run the application.
+
 // end::picture[]
 
 // tag::autocomplete[]
-=== Autocomplete Feature
+=== Auto-complete Feature
 
 The autocomplete mechanism implements a list of commands to be auto-completed upon user input
 
-The autocomplete list is obtained from the creation of an AutoComplete object and is automatically updated since it utilizes the model within the LogicManager
+It is implemented as a SuggestionsProvider object complementing the TextField.
 
 [source,java]
 ----
-    /**
-     * Updates AutoComplete suggestions according to user typed input
-     * @param userInput
-     */
+    public void initAutoComplete() {
+        suggestions = SuggestionProvider.create((Arrays.asList(logic.getAutoCompleteList())));
+        TextFields.bindAutoCompletion(commandTextField, suggestions);
+    }
+----
+
+The AutoComplete Class stores a list of base commands that is final.
+Additionally, it stores:
+* A string array of currently displayed autocomplete phrases which is instantiated to the base commands.
+* ArrayList of residents names as strings that is updated upon update in the model
+
+[source,java]
+----
+    public static final String[] BASE_COMMANDS = { "add", "addEvent", "addImage", "backup", "edit", "select", "delete",
+        "deleteByTag", "deleteEvent", "deleteImage", "deleteTag", "clear", "find", "list", "highlight", "history",
+        "import", "exit", "help", "undo", "redo", "sort", "swaproom", "switch"
+    };
+    private ArrayList<String> personsStringArray;
+    private String[] autoCompleteList;
+----
+
+The String array of currently displayed phrases is updated upon every update instance of the user input to correctly display the current autocomplete phrases.
+
+[source,java]
+----
     public void updateAutoCompleteList(String userInput) {
         switch (userInput) {
         case "":
@@ -439,15 +595,31 @@ The autocomplete list is obtained from the creation of an AutoComplete object an
         case "find":
             this.autoCompleteList = getConcatPersonsArray("find");
             break;
-        case "edit":
-            this.autoCompleteList = getConcatPersonsArray("edit");
-            break;
-        case "delete":
-            this.autoCompleteList = getConcatPersonsArray("delete");
-            break;
-        case "select":
         ...
 ----
+
+The `smart` feature of the autocomplete feature in that it will display person names or indexes when certain commands are typed is implemented by concatenating resident names or indexes to the end of the search phrase.
+
+[source,java]
+----
+    public void updateAutoCompleteList(String userInput) {
+        switch (userInput) {
+        case "":
+            this.resetAutocompleteList();
+            break;
+        case "find":
+            this.autoCompleteList = getConcatResidentsArray("find");
+            break;
+          ...
+
+    private String[] getConcatResidentsArray(String command) {
+        String[] newAutoCompleteList = new String[personsStringArray.size()];
+        for (int i = 0; i < personsStringArray.size(); i++) {
+            if (command.equals("find")) {
+                newAutoCompleteList[i] = command + " " + personsStringArray.get(i);
+            ...
+----
+
 // end::autocomplete[]
 
 // tag::swaproom[]
@@ -483,9 +655,9 @@ Illegal arguments such as non-integer arguments or integers bigger than the size
 // tag::highlight[]
 === Highlight Command
 
-The highlight command is implemented to highlight the contacts with the specified tag
+The highlight command is implemented to highlight the contacts with the tag specified.
 
-If the tag specified does not exist, trying to highlight the persons with the tag will raise an exception:
+If the tag specified does not exist, trying to highlight the persons with the tag will raise the TagNotFoundException:
 [source,java]
 ----
 public void updateHighlight(String highlightTag) {
@@ -500,7 +672,7 @@ public void updateHighlight(String highlightTag) {
 }
 ----
 
-This exception is later caught higher up the execution stack and the user receives a message that the tag does not exist.
+This exception is caught higher up the execution stack and the user receives a message that the tag does not exist.
 
 To highlight the persons with the specified tags, the list of persons is indicated to be updated every time the command is run.
 This change is reflected in the UI with the refreshing of the persons list.
@@ -515,13 +687,12 @@ private void initHighlightStatus() {
 }
 ----
 
-The highlight command also allows removal of highlighting through input of "-" as tag name.
+The highlight command also allows removal of highlighting through input of `-` as tag name.
+[TIP]
+This is possible since `-` is an invalid tag name and would not be a valid tag to be highlighted.
 
 [source, java]
 ----
-    /**
-     * Removes highlighting of everyone
-     */
     public void resetHighlightStatus() throws NoneHighlightedException {
         boolean highlightReset = resetHighlightStatusHelper();
         if (!highlightReset) {
@@ -529,6 +700,22 @@ The highlight command also allows removal of highlighting through input of "-" a
         }
     }
 ----
+
+The following sequence diagram illustrates execution of the highlight command:
+
+image::deleteImageActivityDiagram.png[width="500"]
+
+==== Design Considerations
+
+**Alternatives Considered:**
+
+**Alternative 1:** Allow user to remove tag highlight with additional command or by specifying an invalid tag +
+**Pros:** +
+* Reduce possible confusion and the need to memorize `-` as a deletion command.
+* Easier implementation.
+**Cons:** +
+* User may accidentally unselect highlighted personnel upon wrong input.
+
 // end::highlight[]
 
 // tag::temporaryperson[]
@@ -540,6 +727,7 @@ The implementation of temporary persons has two parts: +
 . Deleting temporary persons
 
 ==== Timestamp
+* Updated user stories incording to user stories
 A Timestamp class has been implemented to record the time a person in the ResidentBook is created; more importantly, it
 records the time that a person will expire. A non-temporary person will never expire and has an expiry date of "null". On the other
  hand, a temporary person has an expiry time represented by the LocalDateTime class.
@@ -1103,6 +1291,62 @@ following considerations:
 * Ambiguity will be introduced into this command. The user may not know if by supplying multiple tags, the application will
 delete persons who have all the tags supplied, or delete all persons who has any of the tags supplied.
 
+// tag::personPanel[]
+=== PersonPanel Interface
+
+The Person Panel interface is implemented as a JavaFX StackPane
+
+When a `PersonCard` in the `PersonListPanel` is selected, additional information of the resident is displayed in the PersonPanel.
+When no person is selected, the default PersonPanel pane is loaded with the image edition buttons disable and all fields set as `-`.
+
+[source, java]
+----
+    private void loadDefaultScreen() {
+        name.textProperty().setValue("No Resident Selected");
+        phone.textProperty().setValue("-");
+        address.textProperty().setValue("-");
+        email.textProperty().setValue("-");
+        enableButtons(false);
+    }
+----
+
+The update of information in the PersonPanel is handled by the following method and `loadPersonInformation` is invoked every time a change is detected.
+
+[source, java]
+----
+    @Subscribe
+    private void handlePersonPanelSelectionChangedEvent(PersonPanelSelectionChangedEvent event) {
+        logger.info(LogsCenter.getEventHandlingLogMessage(event));
+        loadPersonInformation(event.getNewSelection().person);
+    }
+----
+
+To load the image of the person in the PersonPanel, it is imperative that the jar path is checked to indicated `production` or `development` environments.
+
+[source, java]
+----
+    private void initImage() {
+        try {
+            initProjectImage();
+        } catch (Exception pfnfe) {
+            try {
+                initJarImage();
+            ...
+----
+
+==== Design Considerations
+
+**Alternatives Considered:**
+
+**Alternative 1:** Popup Panel instead of permanent display panel +
+**Pros:** +
+* UI space is conserved which would leave more room for viewing Calendar events.
+**Cons:** +
+* Popup window would obstruct the view of the Calendar when the user wishes to both view both resident info and Calendar at the same time.
+* Future implementations could include additional event info in the Panel as well, which means it would be infeasible to make the panel small enough to implement as a popup.
+
+
+// end::personPanel[]
 
 // tag::Calendar[]
 === Calendar Interface
