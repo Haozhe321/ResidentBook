@@ -205,6 +205,9 @@ error message in the message box
 Examples:
 * `highlight owesmoney`
 * `highlight -` - Clears current highlighting
+
+image::highlight.png[width="400"]
+
 // end::highlight[]
 
 // tag::swaproom[]
