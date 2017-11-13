@@ -97,7 +97,6 @@ Examples:
 
 // end::addEvent[]
 
-
 // tag::deleteEvent[]
 === Deleting a event: `deleteEvent`
 
@@ -606,6 +605,8 @@ Events can be managed through the Resident book. It supports add and delete func
 e.g. `add n/James Ho p/22224444 e/jamesho@example.com r/12-100 t/friend t/colleague`
 * *Add Event* `addevent ti/TITLE des/DESCRIPTION loc/LOCATION time/STARTTIME TO ENDTIME` +
 e.g. `addevent ti/End of Sem Dinner des/Organised by USC loc/Cinnamon College time/25/11/2017 2030 to 2359`
+* *Add Image* +
+* *Delete Image* +
 * *Clear* : `clear`
 * *Delete* : `delete INDEX` +
 e.g. `delete 3`
@@ -617,6 +618,7 @@ e.g. `edit 2 n/James Lee e/jameslee@example.com`
 e.g. `find James Jake`
 * *List* : `list`
 * *Help* : `help`
+* *Highlight* : `highlight`
 * *Select* : `select INDEX` +
 e.g.`select 2`
 * *History* : `history`
