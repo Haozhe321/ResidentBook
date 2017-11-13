@@ -826,10 +826,18 @@ image::invalid_date.png[width:800]
 
 image::invalid_duration.png[width:800]
 
+==== Design Considerations
 
-Possible Future Implementations:
+**Aspect:** Allow tentative events +
+**Alternative 1 (current choice):** Tentative events with empty location or datetime fields are not allowed. User needs to specify every field to execute the command.  +
+**Pros:** Easier to implement. Fewer validations needed. Removes ambiguity from the Events List.
+**Cons:** User cannot add tentative events or has to use a "tentative" or "TBC" placeholder to indicate tentativeness. +
+**Alternative 2:** Allow tentative events for which the `Location` or `Datetime` have not yet been finalised.  +
+**Pros:** Allows users to plan for events using the application itself and edit the event as plans get more finalised. +
+**Cons:** Need to add more validations and checks for implementing tentative fields. Sorting list consisting of tentative fields might become an issue.
 
-* Allow tentative events for which the `Location` or `Datetime have not yet been finalised.
+
+==== Other Possible Future Implementations:
 * Allow adding events which span more than one day.
 
 // end::addEvent[]
@@ -852,8 +860,7 @@ If the index passed to the deleteEvent command as argument is greater than the n
     }
 ----
 
-Possible Future Implementations:
-
+==== Other Possible Future Implementations:
 * Allow deleting events by `Title` or `Datetime`.
 * Allow batch deleting of events to clear old events with a single command.
 
@@ -919,9 +926,15 @@ private void handleSwitchTabEvent(SwitchTabRequestEvent event) {
 
 image::switch_tab_sequence_diagram.png[width:800]
 
-Possible Future Implementations:
+==== Design Considerations
 
-* `switch` should be able to detect the current tab and switch without taking in any arguments.
+**Aspect:** Passing of `tab-number` to `switch` +
+**Alternative 1 (current choice):** User needs to specify using the tab-number which tab should to be selected  +
+**Pros:** Easy to implement and track. The user can be certain of the expected outcome without even knowing the current state of the application.
+**Cons:** Requires an extra field from the user. Need to parse and validate the arguments which induces latency and makes the application more prone to bugs +
+**Alternative 2:** `switch` should be able to detect the current tab and switch tabs without taking in any arguments.  +
+**Pros:** Removes the need for parsing and validating any arguments +
+**Cons:** More complicated implementation as it is dependent on the current state of the UI. Harder to test and debug.
 
 // end::switchtab[]
 
@@ -1257,6 +1270,11 @@ private static String getColorForTag(String tag) {
 * Use `ids` instead of `classes` as css selectors.
 * If the new UI Styling is drastically different from the current version, consider putting it in a new file and changing the loaded css to that instead of the current `DarkTheme.css`
 * Do not use `element.setStyle()` unless there is no way using CSS to achieve the same. Using such methods induces difficulty in tracking the source of the styling making it cumbersome to edit later.
+
+==== Other Possible Future Implementations:
+* Change colours to suit color-blind users.
+* Use modals(pop-ups) to show command results instead of the ResultBox.
+
 // end::styling[]
 
 
@@ -1320,8 +1338,7 @@ Some important things to note about `EventBook`:
 * By default, the events are sorted by `Title`
 * Querying for events may throw a `EventNotFoundException` and adding events may throw a `DuplicateEventException`
 
-Possible Future Implementations:
-
+==== Other Possible Future Implementations:
 * Implement a better sort for `Events`. Although they can be sorted by * `Title`, `Location`, `Datetime` and `Description`, a user would like to see upcoming events first. So, a possible sort criteria would be `Number of days until the Event`. So, the upcoming events would be at the top of the list and the past ones and others much later in the future would be further down.
 
 
@@ -1350,8 +1367,7 @@ The `EventBook` is displayed to the user as an `EventCard` in an `EventListPanel
 
 To display this data in presentable manner and not clutter the UI of the application, a `TabPane` is used. A `TabPane` allows users to switch between the Residents List and the Events List. To switch between the tabs, a user can either use the `Switch Tab` command or a mouse click on either of the `Tabs`
 
-Possible Future Implementations:
-
+==== Other Possible Future Implementations:
 * Remove unnecessary details such as `Description` from the `EventCard`.
 * Allow `EventCards` to be selectable so that when selected, a Panel with all the details about the events is displayed
 * Allow the Calendar to be clickable and selectable so that when a day is selected, the Events for the day are displayed.

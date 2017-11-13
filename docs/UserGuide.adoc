@@ -81,10 +81,10 @@ image::autocomplete.png[width="400"]
 // end::autocomplete[]
 
 // tag::addEvent[]
-=== Adding a event: `addEvent`
+=== Adding a event: `addevent`
 
 Adds a event to the event book +
-Format: `addEvent ti/TITLE des/DESCRIPTION loc/LOCATION time/DATETIME`
+Format: `addevent ti/TITLE des/DESCRIPTION loc/LOCATION time/DATETIME`
 
 [TIP]
 The event cannot be longer than one day
