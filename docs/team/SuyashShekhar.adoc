@@ -54,7 +54,7 @@ include::../UserGuide.adoc[tag=swaproom]
 
 ==== Justification
 
-Requests to swap rooms with other residents are very common in residential colleges and halls. The hostel management often finds it difficult to accomodate such a request because of the logistics that goes behind switching the rooms for two people. So, ResidentBook offers a simple command to execute swap rooms. 
+Requests to swap rooms with other residents are very common in residential colleges and halls. The hostel management often finds it difficult to accomodate such a request because of the logistics that goes behind switching the rooms for two people. So, ResidentBook offers a simple command to execute swap rooms.
 
 ==== Implementation
 
