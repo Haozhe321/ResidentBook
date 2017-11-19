@@ -40,4 +40,8 @@ endif::[]
 * Some parts of this sample application were inspired by the excellent http://code.makery.ch/library/javafx-8-tutorial/[Java FX tutorial] by
 _Marco Jakob_.
 
+* This project is built upon the AddressBook-Level4 project created by https://github.com/se-edu/[SE-EDU initiative].
+
+* The calendar used is inspired by the JavaFX calendar by https://github.com/SirGoose3432/javafx-calendar[SirGoose3432].
+
 == Licence : link:LICENSE[MIT]
